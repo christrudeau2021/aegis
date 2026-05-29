@@ -1,9 +1,7 @@
 /**
  * AEGIS — POST /api/complete
- * Issues certificate and sends phishing email with a scheduled delay.
- * Uses Resend's scheduledAt parameter to fire the phish 30 min after cert issuance.
- * The hourly cron is a backup catch-all for any that slip through.
- *
+ * Issues certificate and sends phishing email immediately via Resend.
+ * scheduled_at removed — not supported on Resend free tier.
  * Body: { token, track, score, totalQ }
  */
 
@@ -12,7 +10,6 @@ import { kv } from '@vercel/kv';
 const RECORD_TTL = 60 * 60 * 24 * 90;
 const CERT_TTL   = 60 * 60 * 24 * 365 * 5;
 const BASE_URL   = process.env.AEGIS_BASE_URL || 'https://aegis.cybershield-llc.com';
-const DELAY_MIN  = parseInt(process.env.PHISH_DELAY_MINUTES || '30', 10);
 
 const PHISH_SUBJECTS = {
   gmail:            'Action required: Verify your Google account access',
@@ -46,7 +43,6 @@ export default async function handler(req, res) {
   const pct        = totalQ > 0 ? Math.round((score / totalQ) * 100) : 0;
   const trackLabel = track === 'general' ? 'General Security Awareness' : 'Technical / DevSecOps';
 
-  // Update enrollment record
   if (track === 'general') {
     record.general_complete = true;
     record.general_score    = score;
@@ -60,28 +56,40 @@ export default async function handler(req, res) {
   record.cert_id        = certId;
   record.cert_issued_at = now.toISOString();
 
-  // Schedule phish on general completion (first time only)
-  const sendAt = new Date(Date.now() + DELAY_MIN * 60 * 1000);
-  if (track === 'general' && !record.phish_scheduled) {
-    record.phish_scheduled  = true;
-    record.phish_send_after = sendAt.toISOString();
-    record.phish_sent       = false;
+  // Send phish immediately on general completion (once only)
+  if (track === 'general' && !record.phish_sent) {
+    const simUrl  = `${BASE_URL}/sim/${record.token}`;
+    const subject = PHISH_SUBJECTS[record.platform] || PHISH_SUBJECTS.generic;
+    const html    = buildPhishHtml(record.name, record.email, record.platform, simUrl);
+    const from    = getFrom(record.platform);
 
-    // Send via Resend scheduledAt — fires at the future time server-side
-    // Falls back to cron if Resend scheduled send isn't available on free tier
-    const sent = await schedulePhishEmail(record, sendAt);
-    if (sent) {
-      record.phish_sent    = true;
-      record.phish_sent_at = sendAt.toISOString();
-      console.log(`[complete] phish scheduled via Resend for ${record.email} at ${sendAt.toISOString()}`);
-    } else {
-      console.log(`[complete] phish queued for cron delivery at ${sendAt.toISOString()}`);
+    try {
+      const r = await fetch('https://api.resend.com/emails', {
+        method:  'POST',
+        headers: {
+          Authorization:  `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ from, to: [record.email], subject, html }),
+      });
+      const data = await r.json();
+      if (r.ok) {
+        record.phish_sent    = true;
+        record.phish_sent_at = now.toISOString();
+        record.phish_resend_id = data.id || null;
+        console.log(`[complete] phish sent to ${record.email} id:${data.id}`);
+      } else {
+        record.phish_error = JSON.stringify(data);
+        console.error(`[complete] Resend error for ${record.email}:`, data);
+      }
+    } catch(e) {
+      record.phish_error = e.message;
+      console.error(`[complete] Resend exception:`, e.message);
     }
   }
 
   await kv.set(`token:${token}`, record, { ex: RECORD_TTL });
 
-  // Store certificate
   const certRecord = {
     cert_id: certId, name: record.name, email: record.email,
     org: record.org || '', role: record.role || '', industry: record.industry || '',
@@ -90,7 +98,7 @@ export default async function handler(req, res) {
     issuer: 'CyberShield Technologies LLC',
     issuer_name: 'Chris Trudeau, CISSP · ISSAP · PCI-DSS ISA',
     verify_url: `${BASE_URL}/verify/${certId}`,
-    general_complete: record.general_complete,
+    general_complete:   record.general_complete,
     technical_complete: record.technical_complete,
   };
   await kv.set(`cert:${certId}`, certRecord, { ex: CERT_TTL });
@@ -109,47 +117,15 @@ export default async function handler(req, res) {
   });
 }
 
-// ── RESEND SCHEDULED SEND ─────────────────────────────────────────────────────
-// Resend supports scheduledAt on paid plans. On free tier this returns an error
-// and we fall back to the hourly cron.
-async function schedulePhishEmail(record, sendAt) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return false;
-
-  const simUrl  = `${BASE_URL}/sim/${record.token}`;
-  const html    = buildPhishHtml(record.name, record.email, record.platform, simUrl);
-  const subject = PHISH_SUBJECTS[record.platform] || PHISH_SUBJECTS.generic;
-  const from    = getFrom(record.platform);
-
-  try {
-    const r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from, to: [record.email], subject, html,
-        scheduled_at: sendAt.toISOString(),
-      }),
-    });
-    const data = await r.json();
-    // If scheduledAt isn't supported (free tier), Resend returns an error
-    if (!r.ok) {
-      console.warn('[complete] Resend scheduledAt not available, falling back to cron:', data);
-      return false;
-    }
-    return true;
-  } catch(e) {
-    console.error('[complete] Resend error:', e.message);
-    return false;
-  }
-}
-
 function getFrom(platform) {
   const names = {
-    gmail:'Google Security', google_workspace:'Google Workspace Security',
-    m365:'Microsoft Account Team', ms_personal:'Microsoft Security',
-    generic:'Secure Document Services',
+    gmail:            'Google Security',
+    google_workspace: 'Google Workspace Security',
+    m365:             'Microsoft Account Team',
+    ms_personal:      'Microsoft Security',
+    generic:          'Secure Document Services',
   };
-  return `${names[platform]||'Security Notification'} <security-noreply@cybershield-llc.com>`;
+  return `${names[platform] || 'Security Notification'} <security-noreply@cybershield-llc.com>`;
 }
 
 function buildPhishHtml(name, email, platform, simUrl) {
