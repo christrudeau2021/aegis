@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#07111f;--bg2:#0d1e33;--bg3:#0a1928;--border:rgba(59,158,255,0.14);--blue:#3b9eff;--teal:#00d4a0;--text:#e8f0f8;--muted:#7a9ab8;--danger:#ef4444;--warn:#f59e0b;--serif:'DM Serif Display',serif;--sans:'DM Sans',sans-serif;--mono:'IBM Plex Mono',monospace;}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(59,158,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(59,158,255,0.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+
+    /* LOGIN */
+    .login-wrap{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+    .login-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:40px 36px;width:100%;max-width:360px;position:relative;overflow:hidden;}
+    .login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--teal));}
+    .login-icon{font-size:36px;margin-bottom:16px;text-align:center;}
+    .login-card h2{font-family:var(--serif);font-size:22px;margin-bottom:4px;text-align:center;}
+    .login-sub{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-bottom:28px;}
+    .login-field{margin-bottom:14px;}
+    .login-field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+    .login-field input{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s;}
+    .login-field input:focus{border-color:var(--blue);}
+    .login-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--blue),var(--teal));color:var(--bg);font-weight:600;font-size:14px;border:none;border-radius:7px;cursor:pointer;margin-top:6px;font-family:var(--sans);transition:opacity .2s;}
+    .login-btn:hover{opacity:.9;}
+    .login-btn:disabled{opacity:.45;cursor:default;}
+    .login-error{display:none;color:#fca5a5;font-size:13px;text-align:center;margin-top:10px;}
+    .spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(7,17,31,.3);border-top-color:var(--bg);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* DASHBOARD */
+    #dash{display:none;}
+    .topbar{position:sticky;top:0;z-index:50;background:rgba(7,17,31,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:60px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;}
+    .topbar-brand{font-family:var(--serif);font-size:18px;color:var(--text);}
+    .topbar-brand span{color:var(--blue);}
+    .topbar-right{display:flex;align-items:center;gap:16px;}
+    .topbar-tag{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;}
+    .btn-sm{padding:6px 14px;font-family:var(--mono);font-size:11px;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:5px;cursor:pointer;transition:border-color .2s,color .2s;}
+    .btn-sm:hover{border-color:var(--blue);color:var(--blue);}
+    .page{position:relative;z-index:1;padding:28px 32px;max-width:1200px;margin:0 auto;}
+
+    /* KPI GRID */
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px;}
+    .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px 22px;}
+    .kpi-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+    .kpi-val{font-family:var(--mono);font-size:34px;line-height:1;font-weight:500;}
+    .kpi-sub{font-size:12px;color:var(--muted);margin-top:5px;}
+    .kblue{color:var(--blue);} .kteal{color:var(--teal);} .kred{color:var(--danger);} .kwarn{color:var(--warn);}
+
+    /* TABLES */
+    .section-title{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;}
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+    .card-hdr{padding:12px 20px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;}
+    table{width:100%;border-collapse:collapse;}
+    th{padding:9px 16px;text-align:left;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;border-bottom:1px solid var(--border);background:rgba(59,158,255,.025);}
+    td{padding:11px 16px;font-size:13px;border-bottom:1px solid rgba(59,158,255,.05);}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(59,158,255,.03);}
+    .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-family:var(--mono);font-size:10px;}
+    .bg{background:rgba(239,68,68,.12);color:#fca5a5;}
+    .bt{background:rgba(0,212,160,.1);color:var(--teal);}
+    .bb{background:rgba(59,158,255,.1);color:var(--blue);}
+    .bm{background:rgba(122,154,184,.1);color:var(--muted);}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .empty{padding:28px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px;}
+
+    /* CSV export */
+    .btn-export{padding:5px 12px;font-family:var(--mono);font-size:10px;border:1px solid rgba(0,212,160,.25);background:rgba(0,212,160,.06);color:var(--teal);border-radius:5px;cursor:pointer;transition:background .2s;}
+    .btn-export:hover{background:rgba(0,212,160,.12);}
+
+    @media(max-width:700px){.page{padding:16px;}.two-col{grid-template-columns:1fr;}.kpi-grid{grid-template-columns:1fr 1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginView" class="login-wrap">
+  <div class="login-card">
+    <div class="login-icon">🔐</div>
+    <h2>Aegis Admin</h2>
+    <p class="login-sub">// CyberShield Technologies</p>
+    <div class="login-field"><label>Username</label><input type="text" id="iUser" autocomplete="username" placeholder="admin"></div>
+    <div class="login-field"><label>Password</label><input type="password" id="iPass" autocomplete="current-password" placeholder="••••••••"></div>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">Access Dashboard</button>
+    <div class="login-error" id="loginErr">Invalid credentials.</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash">
+  <div class="topbar">
+    <div class="topbar-brand"><span>Aegis</span> Admin</div>
+    <div class="topbar-right">
+      <span class="topbar-tag" id="genAt">—</span>
+      <button class="btn-sm" onclick="loadStats()">↺ Refresh</button>
+      <button class="btn-sm" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+  <div class="page" id="dashContent">
+    <div class="empty">Loading campaign data…</div>
+  </div>
+</div>
+
+<script>
+let authHeader = '';
+
+// Restore session
+const saved = sessionStorage.getItem('aegis_admin_auth');
+if (saved) { authHeader = saved; init(); }
+
+document.getElementById('iPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+async function doLogin() {
+  const user = document.getElementById('iUser').value.trim();
+  const pass = document.getElementById('iPass').value;
+  if (!user || !pass) return;
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Verifying…';
+  document.getElementById('loginErr').style.display = 'none';
+
+  const creds = btoa(`${user}:${pass}`);
+  const header = `Basic ${creds}`;
+
+  try {
+    const resp = await fetch('/api/admin/stats', { headers: { Authorization: header } });
+    if (resp.status === 401) throw new Error('Unauthorized');
+    const data = await resp.json();
+    authHeader = header;
+    sessionStorage.setItem('aegis_admin_auth', header);
+    init();
+    renderDash(data);
+  } catch(e) {
+    document.getElementById('loginErr').style.display = 'block';
+    btn.disabled = false;
+    btn.innerHTML = 'Access Dashboard';
+  }
+}
+
+function init() {
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('dash').style.display = 'block';
+  if (!authHeader) return;
+  loadStats();
+}
+
+function logout() {
+  sessionStorage.removeItem('aegis_admin_auth');
+  authHeader = '';
+  document.getElementById('loginView').style.display = 'flex';
+  document.getElementById('dash').style.display = 'none';
+  document.getElementById('iPass').value = '';
+}
+
+async function loadStats() {
+  try {
+    const resp = await fetch('/api/admin/stats', { headers: { Authorization: authHeader } });
+    if (resp.status === 401) { logout(); return; }
+    const data = await resp.json();
+    renderDash(data);
+  } catch(e) {
+    document.getElementById('dashContent').innerHTML = `<div class="empty">Error loading data: ${e.message}</div>`;
+  }
+}
+
+function renderDash(d) {
+  document.getElementById('genAt').textContent = 'Updated ' + new Date(d.generated_at).toLocaleTimeString();
+
+  const PLATFORM = { gmail:'Gmail', google_workspace:'Google Workspace', m365:'M365', ms_personal:'MS Personal', generic:'Generic' };
+  const ROLE_L   = { executive:'Executive', finance:'Finance', hr:'HR', legal:'Legal', it:'IT / Security', operations:'Operations', developer:'Developer', devsecops:'DevSecOps' };
+
+  const html = `
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Enrolled</div><div class="kpi-val kblue">${d.total_enrolled}</div><div class="kpi-sub">total registrations</div></div>
+      <div class="kpi"><div class="kpi-label">General Complete</div><div class="kpi-val kteal">${d.general_complete}</div><div class="kpi-sub">${d.general_completion_rate}% completion rate</div></div>
+      <div class="kpi"><div class="kpi-label">Tech Complete</div><div class="kpi-val kteal">${d.technical_complete}</div><div class="kpi-sub">DevSecOps track</div></div>
+      <div class="kpi"><div class="kpi-label">Certs Issued</div><div class="kpi-val kblue">${d.certs_issued}</div><div class="kpi-sub">verifiable certificates</div></div>
+      <div class="kpi"><div class="kpi-label">Phish Sent</div><div class="kpi-val kwarn">${d.phish_sent}</div><div class="kpi-sub">${d.phish_pending} pending</div></div>
+      <div class="kpi"><div class="kpi-label">Clicked</div><div class="kpi-val kred">${d.clicked}</div><div class="kpi-sub">${d.click_rate}% click rate</div></div>
+      <div class="kpi"><div class="kpi-label">Cred Attempt</div><div class="kpi-val kred">${d.attempted_login}</div><div class="kpi-sub">${d.attempt_rate}% of clickers</div></div>
+      <div class="kpi"><div class="kpi-label">Stayed Safe</div><div class="kpi-val kteal">${d.phish_sent - d.clicked}</div><div class="kpi-sub">didn't click</div></div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-title">// By Role</div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Role</th><th>Count</th></tr></thead>
+            <tbody>${
+              Object.entries(d.by_role||{}).sort((a,b)=>b[1]-a[1]).map(([r,n]) =>
+                `<tr><td>${ROLE_L[r]||r}</td><td><span class="badge bb">${n}</span></td></tr>`
+              ).join('') || `<tr><td colspan="2"><div class="empty">No data</div></td></tr>`
+            }</tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">// By Platform</div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Platform</th><th>Count</th></tr></thead>
+            <tbody>${
+              Object.entries(d.by_platform||{}).sort((a,b)=>b[1]-a[1]).map(([p,n]) =>
+                `<tr><td>${PLATFORM[p]||p}</td><td><span class="badge bb">${n}</span></td></tr>`
+              ).join('') || `<tr><td colspan="2"><div class="empty">No data</div></td></tr>`
+            }</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">// Recent Certificates</div>
+    <div class="card">
+      <div class="card-hdr"><span>Last 25 certificates issued</span><button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button></div>
+      <table>
+        <thead><tr><th>Name</th><th>Org</th><th>Track</th><th>Score</th><th>Issued</th><th>Cert ID</th></tr></thead>
+        <tbody>${
+          (d.recent_certs||[]).length === 0
+          ? `<tr><td colspan="6"><div class="empty">No certificates issued yet</div></td></tr>`
+          : d.recent_certs.map(c => `
+            <tr>
+              <td>${esc(c.name)}</td>
+              <td style="color:var(--muted)">${esc(c.org)}</td>
+              <td>${c.track.includes('Technical') ? `<span class="badge bm">Technical</span>` : `<span class="badge bt">General</span>`}</td>
+              <td style="font-family:var(--mono);font-size:12px">${esc(c.score)}</td>
+              <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${new Date(c.issued_at).toLocaleDateString()}</td>
+              <td><a href="/verify/${esc(c.cert_id)}" target="_blank" style="font-family:var(--mono);font-size:10px;color:var(--blue);text-decoration:none;">${esc(c.cert_id)}</a></td>
+            </tr>`
+          ).join('')
+        }</tbody>
+      </table>
+    </div>
+
+    <div class="section-title">// Enrollment Detail (last 50)</div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Org</th><th>Role</th><th>General</th><th>Phish</th><th>Result</th><th>Registered</th></tr></thead>
+        <tbody>${
+          (d.recent_enrollments||[]).length === 0
+          ? `<tr><td colspan="8"><div class="empty">No enrollments yet</div></td></tr>`
+          : d.recent_enrollments.map(r => `
+            <tr>
+              <td>${esc(r.name)}</td>
+              <td style="font-family:var(--mono);font-size:11px">${esc(r.email)}</td>
+              <td style="color:var(--muted)">${esc(r.org)}</td>
+              <td style="color:var(--muted)">${ROLE_L[r.role]||r.role||'—'}</td>
+              <td>${r.general_complete
+                ? `<span class="badge bt">${r.general_score}/${r.general_total}</span>`
+                : `<span class="badge bm">—</span>`}</td>
+              <td>${r.phish_sent
+                ? `<span class="badge kwarn" style="background:rgba(245,158,11,.1)">Sent</span>`
+                : r.phish_send_after
+                  ? `<span class="badge bm">Scheduled</span>`
+                  : `<span class="badge bm">Pending</span>`}</td>
+              <td>${r.attempted
+                ? `<span class="badge bg">Clicked + Creds</span>`
+                : r.clicked
+                  ? `<span class="badge" style="background:rgba(245,158,11,.1);color:var(--warn)">Clicked</span>`
+                  : r.phish_sent
+                    ? `<span class="badge bt">Safe ✓</span>`
+                    : `<span class="badge bm">—</span>`}</td>
+              <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${new Date(r.registered_at).toLocaleDateString()}</td>
+            </tr>`
+          ).join('')
+        }</tbody>
+      </table>
+    </div>`;
+
+  document.getElementById('dashContent').innerHTML = html;
+
+  // Store data for CSV export
+  window._dashData = d;
+}
+
+function exportCSV() {
+  const d = window._dashData;
+  if (!d) return;
+  const ROLE_L = { executive:'Executive', finance:'Finance', hr:'HR', legal:'Legal', it:'IT / Security', operations:'Operations', developer:'Developer', devsecops:'DevSecOps' };
+  const rows = [
+    ['Name','Email','Org','Role','Industry','Registered','General Complete','General Score','Tech Complete','Phish Sent','Clicked','Cred Attempt','Cert ID']
+  ];
+  (d.recent_enrollments||[]).forEach(r => {
+    rows.push([
+      r.name, r.email, r.org, ROLE_L[r.role]||r.role, '—',
+      new Date(r.registered_at).toISOString().slice(0,10),
+      r.general_complete ? 'Yes' : 'No',
+      r.general_complete ? `${r.general_score}/${r.general_total}` : '—',
+      r.technical_complete ? 'Yes' : 'No',
+      r.phish_sent ? 'Yes' : 'No',
+      r.clicked ? 'Yes' : 'No',
+      r.attempted ? 'Yes' : 'No',
+      r.cert_id || '—',
+    ]);
+  });
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type:'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `aegis-campaign-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>

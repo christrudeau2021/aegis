@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft account | Sign in</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;min-height:100vh;display:flex;flex-direction:column;}
+.ms-header{padding:16px 20px;border-bottom:1px solid #e0e0e0;}
+.ms-header-logo{display:flex;align-items:center;gap:8px;}
+.ms-squares{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:18px;height:18px;}
+.ms-squares div:nth-child(1){background:#f25022;}
+.ms-squares div:nth-child(2){background:#7fba00;}
+.ms-squares div:nth-child(3){background:#00a4ef;}
+.ms-squares div:nth-child(4){background:#ffb900;}
+.ms-header-name{font-size:15px;font-weight:600;color:#1b1b1b;}
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+.card{width:100%;max-width:380px;}
+h1{font-size:24px;font-weight:300;color:#1b1b1b;margin-bottom:6px;}
+.acct-display{font-size:15px;color:#1b1b1b;margin-bottom:28px;font-weight:400;}
+.pw-wrap{position:relative;margin-bottom:4px;}
+.pw-input{
+  width:100%;border:none;border-bottom:2px solid #767676;padding:8px 36px 8px 0;
+  font-size:16px;color:#1b1b1b;outline:none;background:transparent;
+  font-family:'Segoe UI',Arial,sans-serif;transition:border-color .15s;
+}
+.pw-input:focus{border-bottom-color:#0078d4;}
+.pw-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#767676;font-size:18px;}
+.pw-label{font-size:13px;color:#767676;margin-bottom:20px;display:block;}
+.keep-signed{display:flex;align-items:center;gap:10px;margin-bottom:28px;}
+.keep-signed input{width:16px;height:16px;accent-color:#0078d4;}
+.keep-signed label{font-size:14px;color:#1b1b1b;}
+.btn-next{
+  background:#0067b8;color:#fff;font-size:15px;font-weight:600;
+  padding:10px 36px;border:none;cursor:pointer;font-family:'Segoe UI',Arial,sans-serif;
+  transition:background .15s;float:right;
+}
+.btn-next:hover{background:#005a9e;}
+.clearfix::after{content:'';display:table;clear:both;}
+.links-row{display:flex;gap:20px;margin-top:40px;clear:both;flex-wrap:wrap;}
+.links-row a{font-size:13px;color:#0067b8;text-decoration:none;}
+.links-row a:hover{text-decoration:underline;}
+.ms-footer{padding:16px 20px;background:#f2f2f2;border-top:1px solid #e0e0e0;display:flex;gap:20px;flex-wrap:wrap;}
+.ms-footer a{font-size:11px;color:#1b1b1b;text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="ms-header">
+  <div class="ms-header-logo">
+    <div class="ms-squares"><div></div><div></div><div></div><div></div></div>
+    <span class="ms-header-name">Microsoft</span>
+  </div>
+</div>
+<div class="main">
+  <div class="card">
+    <h1>Enter password</h1>
+    <p class="acct-display" id="acct-display">Loading...</p>
+    <form id="phish-form" onsubmit="handleSubmit(event)" class="clearfix">
+      <input type="hidden" id="token-field" value="__TOKEN__">
+      <input type="hidden" id="email-field" value="__EMAIL__">
+      <div class="pw-wrap">
+        <input class="pw-input" type="password" id="pw-field" autocomplete="current-password">
+        <button type="button" class="pw-toggle" onclick="togglePw()">👁</button>
+      </div>
+      <span class="pw-label">Password</span>
+      <div class="keep-signed">
+        <input type="checkbox" id="keep" checked>
+        <label for="keep">Keep me signed in</label>
+      </div>
+      <button type="submit" class="btn-next">Sign in</button>
+    </form>
+    <div class="links-row" style="margin-top:48px;">
+      <a href="#">Forgot password?</a>
+      <a href="#">Sign-in options</a>
+    </div>
+  </div>
+</div>
+<div class="ms-footer">
+  <a href="#">Terms of use</a>
+  <a href="#">Privacy &amp; cookies</a>
+  <a href="#">© 2026 Microsoft</a>
+</div>
+<script>
+const email = document.getElementById('email-field').value || 'user@outlook.com';
+document.getElementById('acct-display').textContent = email;
+function togglePw() {
+  const f = document.getElementById('pw-field');
+  f.type = f.type === 'password' ? 'text' : 'password';
+}
+async function handleSubmit(e) {
+  e.preventDefault();
+  // SECURITY: Password NOT read or transmitted — by design
+  const token = document.getElementById('token-field').value;
+  const emailEntered = email;
+  try {
+    await fetch('/api/sim-capture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, email_entered: emailEntered }),
+    });
+  } catch {}
+  window.location.href = '/phished';
+}
+</script>
+</body>
+</html>

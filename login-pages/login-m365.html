@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in to Microsoft 365</title>
+<!--
+  PHISHING SIMULATION — MICROSOFT 365 TEMPLATE
+  Served for: MX contains protection.outlook.com (work accounts)
+  // FUTURE: Inject org name from KV record into "Sign in to {Org} Microsoft 365"
+  // FUTURE: Dark mode variant (many M365 users have system dark mode)
+-->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f2f2f2;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.ms-card{background:#fff;width:440px;padding:44px 44px 36px;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+.ms-logo{margin-bottom:32px;display:flex;align-items:center;gap:10px;}
+.ms-logo-squares{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:22px;height:22px;}
+.ms-logo-squares div:nth-child(1){background:#f25022;}
+.ms-logo-squares div:nth-child(2){background:#7fba00;}
+.ms-logo-squares div:nth-child(3){background:#00a4ef;}
+.ms-logo-squares div:nth-child(4){background:#ffb900;}
+.ms-logo-text{font-size:20px;color:#1b1b1b;font-weight:600;}
+h1{font-size:24px;font-weight:600;color:#1b1b1b;margin-bottom:4px;}
+.ms-sub{font-size:13px;color:#1b1b1b;margin-bottom:20px;}
+.ms-account{font-size:14px;color:#1b1b1b;margin-bottom:24px;font-weight:400;}
+.ms-input{
+  width:100%;border:none;border-bottom:1px solid #666;border-radius:0;
+  padding:8px 0;font-size:15px;color:#1b1b1b;outline:none;
+  background:transparent;font-family:'Segoe UI',Arial,sans-serif;
+  transition:border-color .15s;margin-bottom:4px;
+}
+.ms-input:focus{border-bottom:2px solid #0078d4;}
+.ms-input-label{font-size:13px;color:#1b1b1b;display:block;margin-bottom:4px;margin-top:8px;}
+.ms-hint{font-size:11px;color:#666;margin-bottom:28px;}
+.ms-forgot{display:block;font-size:14px;color:#0067b8;margin-bottom:32px;}
+.ms-btn{
+  width:100%;background:#0078d4;color:#fff;font-size:15px;font-weight:600;
+  padding:8px;border:none;cursor:pointer;font-family:'Segoe UI',Arial,sans-serif;
+  transition:background .15s;margin-bottom:16px;
+}
+.ms-btn:hover{background:#005a9e;}
+.ms-options{font-size:13px;color:#0067b8;margin-bottom:20px;}
+.ms-options a{color:#0067b8;text-decoration:none;}
+.ms-options a:hover{text-decoration:underline;}
+.ms-footer{padding-top:20px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;}
+.ms-footer a{font-size:11px;color:#666;text-decoration:none;}
+.ms-footer a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="ms-card">
+  <div class="ms-logo">
+    <div class="ms-logo-squares">
+      <div></div><div></div><div></div><div></div>
+    </div>
+    <span class="ms-logo-text">Microsoft</span>
+  </div>
+  <h1>Sign in</h1>
+  <p class="ms-sub">to continue to Microsoft 365</p>
+  <p class="ms-account" id="ms-account">Loading account...</p>
+  <form id="phish-form" onsubmit="handleSubmit(event)">
+    <input type="hidden" id="token-field" value="__TOKEN__">
+    <input type="hidden" id="email-field" value="__EMAIL__">
+    <label class="ms-input-label">Password</label>
+    <input class="ms-input" type="password" id="pw-field" autocomplete="current-password" placeholder="Password">
+    <p class="ms-hint"></p>
+    <a class="ms-forgot" href="#">Forgot my password</a>
+    <button type="submit" class="ms-btn">Sign in</button>
+    <div class="ms-options">
+      <a href="#">Sign-in options</a>
+    </div>
+  </form>
+  <div class="ms-footer">
+    <a href="#">Terms of use</a>
+    <a href="#">Privacy &amp; cookies</a>
+    <a href="#">...</a>
+  </div>
+</div>
+<script>
+const email = document.getElementById('email-field').value || 'user@company.com';
+document.getElementById('ms-account').textContent = email;
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  // SECURITY: Password NOT read or transmitted — by design
+  const token        = document.getElementById('token-field').value;
+  const emailEntered = email;
+  try {
+    await fetch('/api/sim-capture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, email_entered: emailEntered }),
+    });
+  } catch {}
+  window.location.href = '/phished';
+}
+</script>
+</body>
+</html>

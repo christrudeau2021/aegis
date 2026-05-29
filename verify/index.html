@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Certificate — Aegis | CyberShield Technologies</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#07111f;--bg2:#0d1e33;--bg3:#0a1928;--border:rgba(59,158,255,0.14);--blue:#3b9eff;--teal:#00d4a0;--text:#e8f0f8;--muted:#7a9ab8;--danger:#ef4444;--serif:'DM Serif Display',serif;--sans:'DM Sans',sans-serif;--mono:'IBM Plex Mono',monospace;}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(59,158,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(59,158,255,0.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;}
+    .wrap{position:relative;z-index:1;width:100%;max-width:560px;}
+
+    .loading{text-align:center;padding:60px 0;}
+    .loading p{font-family:var(--mono);font-size:13px;color:var(--muted);}
+    .spinner{display:inline-block;width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .status-valid{background:rgba(0,212,160,.07);border:1px solid rgba(0,212,160,.25);border-radius:10px;padding:14px 20px;display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+    .status-valid p{font-size:13px;color:#6ee7c7;}
+    .status-valid strong{color:var(--teal);}
+    .status-invalid{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.22);border-radius:10px;padding:14px 20px;display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+    .status-invalid p{font-size:13px;color:#fca5a5;}
+
+    .cert-card{background:var(--bg2);border:1px solid rgba(0,212,160,.2);border-radius:12px;padding:32px;position:relative;overflow:hidden;}
+    .cert-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--teal));}
+    .cert-card::after{content:'AEGIS';position:absolute;right:-6px;bottom:-14px;font-family:var(--serif);font-size:64px;color:rgba(0,212,160,.04);line-height:1;pointer-events:none;}
+    .cert-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;}
+    .cert-issuer{font-family:var(--mono);font-size:9px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase;}
+    .cert-issuer strong{color:var(--blue);display:block;font-size:12px;margin-top:2px;}
+    .cert-shield{width:40px;height:40px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+    .cert-hr{height:1px;background:var(--border);margin:16px 0;}
+    .cert-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
+    .cert-name{font-family:var(--serif);font-size:24px;color:var(--text);margin-bottom:14px;}
+    .cert-detail{font-size:13px;color:var(--muted);margin-bottom:5px;}
+    .cert-detail strong{color:var(--text);}
+    .cert-footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+    .cert-sig{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--muted);}
+    .cert-sig span{display:block;font-family:var(--mono);font-style:normal;font-size:9px;letter-spacing:.09em;color:var(--muted);margin-top:3px;text-transform:uppercase;}
+    .cert-meta{font-family:var(--mono);font-size:9px;color:var(--muted);text-align:right;line-height:1.7;}
+    .cert-id{color:var(--teal);}
+
+    .footer-note{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;margin-top:20px;}
+    .footer-note a{color:var(--blue);text-decoration:none;}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Verifying certificate…</p>
+  </div>
+  <div id="result" style="display:none;"></div>
+</div>
+
+<script>
+// Extract certId from URL: /verify/AGS-2025-XXXXXXXXXX
+const pathParts = window.location.pathname.split('/verify/');
+const certId = pathParts[1]?.trim() || '';
+
+async function verify() {
+  const loading = document.getElementById('loading');
+  const result  = document.getElementById('result');
+
+  if (!certId) {
+    loading.style.display = 'none';
+    result.style.display = 'block';
+    result.innerHTML = `<div class="status-invalid"><span style="font-size:20px">❌</span><p>No certificate ID provided.</p></div>`;
+    return;
+  }
+
+  try {
+    const resp = await fetch(`/api/cert/${certId}`);
+    const data = await resp.json();
+    loading.style.display = 'none';
+    result.style.display = 'block';
+
+    if (!data.valid || resp.status === 404) {
+      result.innerHTML = `
+        <div class="status-invalid">
+          <span style="font-size:20px">❌</span>
+          <p><strong>Certificate not found.</strong> The ID <code style="font-family:var(--mono);font-size:11px">${esc(certId)}</code> does not match any issued certificate.</p>
+        </div>
+        <div class="footer-note"><a href="https://aegis.cybershield-llc.com">← aegis.cybershield-llc.com</a></div>`;
+      return;
+    }
+
+    const issued = new Date(data.issuedAt).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+    const trackBadge = data.track === 'technical'
+      ? '<span style="background:rgba(245,158,11,.1);color:#f59e0b;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:10px;">Technical Track</span>'
+      : '<span style="background:rgba(0,212,160,.08);color:#00d4a0;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:10px;">General Awareness</span>';
+
+    result.innerHTML = `
+      <div class="status-valid">
+        <span style="font-size:22px">✅</span>
+        <p><strong>Valid certificate.</strong> This certificate was issued by CyberShield Technologies LLC and is authentic.</p>
+      </div>
+      <div class="cert-card">
+        <div class="cert-top">
+          <div class="cert-issuer">CyberShield Technologies LLC<strong>Aegis Security Awareness Platform</strong></div>
+          <div class="cert-shield">🛡️</div>
+        </div>
+        <div class="cert-hr"></div>
+        <div class="cert-lbl">Certificate of Completion</div>
+        <div class="cert-name">${esc(data.name)}</div>
+        <div class="cert-detail">Completed ${trackBadge} — <strong>${esc(data.trackLabel)}</strong></div>
+        ${data.org ? `<div class="cert-detail">Organization: <strong>${esc(data.org)}</strong></div>` : ''}
+        ${data.role ? `<div class="cert-detail">Role: <strong>${esc(data.role)}</strong></div>` : ''}
+        <div class="cert-detail">Score: <strong>${data.score}/${data.totalQ} (${data.pct}%)</strong></div>
+        <div class="cert-footer">
+          <div class="cert-sig">${esc(data.issuerName)}<span>${esc(data.issuer)}</span></div>
+          <div class="cert-meta">${issued}<br><span class="cert-id">${esc(data.certId)}</span></div>
+        </div>
+      </div>
+      <div class="footer-note">Verified at <a href="https://aegis.cybershield-llc.com">aegis.cybershield-llc.com</a> · <a href="https://cybershield-llc.com">CyberShield Technologies LLC</a></div>`;
+
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('result').style.display = 'block';
+    document.getElementById('result').innerHTML = `<div class="status-invalid"><span style="font-size:20px">⚠️</span><p>Verification service temporarily unavailable. Please try again in a moment.</p></div>`;
+  }
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+verify();
+</script>
+</body>
+</html>

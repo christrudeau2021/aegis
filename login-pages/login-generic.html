@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Document Portal — Verify Identity</title>
+<!--
+  PHISHING SIMULATION — GENERIC TEMPLATE
+  Used for: Unknown mail platforms, Mimecast, Proofpoint, custom domains
+  Design: Neutral "secure document portal" — no specific branding that
+  could contradict the user's actual email platform.
+
+  // FUTURE: Inject client org name for "XYZ Corp — Secure Portal"
+  // FUTURE: Variant for specific ISPs (Yahoo, Apple iCloud, etc.)
+-->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f0f2f5;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+.portal-header{text-align:center;margin-bottom:28px;}
+.portal-icon{width:52px;height:52px;background:linear-gradient(135deg,#1a2744,#0c4a8a);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;}
+.portal-name{font-size:16px;font-weight:700;color:#1a2744;}
+.portal-sub{font-size:12px;color:#6b7280;margin-top:2px;}
+.card{background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.1);padding:36px 36px 28px;width:100%;max-width:400px;}
+.doc-preview{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;margin-bottom:24px;display:flex;gap:12px;align-items:center;}
+.doc-icon{font-size:24px;flex-shrink:0;}
+.doc-info h3{font-size:13px;font-weight:600;color:#1a2744;margin-bottom:2px;}
+.doc-info p{font-size:11px;color:#6b7280;}
+.doc-badge{display:inline-block;background:#fef3c7;border:1px solid #fcd34d;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:600;color:#92400e;margin-top:4px;}
+h2{font-size:18px;font-weight:700;color:#1a2744;margin-bottom:6px;}
+.verify-sub{font-size:13px;color:#6b7280;margin-bottom:20px;line-height:1.5;}
+.email-display{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px 14px;font-size:13px;color:#374151;margin-bottom:16px;font-weight:500;}
+.input-label{font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;display:block;}
+.pw-wrap{position:relative;margin-bottom:6px;}
+.pw-input{width:100%;border:1px solid #d1d5db;border-radius:6px;padding:10px 40px 10px 12px;font-size:14px;color:#1a2744;outline:none;transition:border-color .15s;font-family:inherit;}
+.pw-input:focus{border-color:#0c4a8a;box-shadow:0 0 0 3px rgba(12,74,138,.1);}
+.pw-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9ca3af;font-size:16px;}
+.security-note{font-size:11px;color:#6b7280;margin-bottom:20px;display:flex;align-items:flex-start;gap:6px;}
+.security-note::before{content:'🔒';font-size:11px;flex-shrink:0;}
+.btn-verify{width:100%;background:linear-gradient(135deg,#1a2744,#0c4a8a);color:#fff;font-size:14px;font-weight:600;padding:12px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;transition:opacity .15s;margin-bottom:12px;}
+.btn-verify:hover{opacity:.9;}
+.help-link{text-align:center;font-size:12px;color:#6b7280;}
+.help-link a{color:#0c4a8a;text-decoration:none;}
+.portal-footer{margin-top:20px;text-align:center;}
+.portal-footer p{font-size:11px;color:#9ca3af;}
+.portal-footer a{font-size:11px;color:#6b7280;text-decoration:none;margin:0 8px;}
+.trust-badges{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:10px;}
+.trust-badge{font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:4px;}
+</style>
+</head>
+<body>
+<div class="portal-header">
+  <div class="portal-icon">🔒</div>
+  <div class="portal-name">Secure Document Portal</div>
+  <div class="portal-sub">Protected file sharing</div>
+</div>
+<div class="card">
+  <div class="doc-preview">
+    <div class="doc-icon">📄</div>
+    <div class="doc-info">
+      <h3>Confidential Document</h3>
+      <p>Shared securely · Requires verification</p>
+      <span class="doc-badge">EXPIRES IN 24 HOURS</span>
+    </div>
+  </div>
+  <h2>Verify your identity</h2>
+  <p class="verify-sub">Enter your password to access the document shared with your account.</p>
+  <div class="email-display" id="email-display">Loading...</div>
+  <form id="phish-form" onsubmit="handleSubmit(event)">
+    <input type="hidden" id="token-field" value="__TOKEN__">
+    <input type="hidden" id="email-field" value="__EMAIL__">
+    <label class="input-label">Password</label>
+    <div class="pw-wrap">
+      <input class="pw-input" type="password" id="pw-field" autocomplete="current-password" placeholder="Enter your password">
+      <button type="button" class="pw-toggle" onclick="togglePw()">👁</button>
+    </div>
+    <p class="security-note">Your password is verified securely and never stored.</p>
+    <button type="submit" class="btn-verify">Access Document →</button>
+  </form>
+  <p class="help-link"><a href="#">Having trouble? Contact support</a></p>
+</div>
+<div class="portal-footer">
+  <div class="trust-badges">
+    <span class="trust-badge">🔐 256-bit SSL</span>
+    <span class="trust-badge">✓ SOC 2 Compliant</span>
+    <span class="trust-badge">🛡 HIPAA Ready</span>
+  </div>
+  <div style="margin-top:8px;">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
+    <a href="#">Help</a>
+  </div>
+  <p style="margin-top:8px;">© 2026 Secure Document Services</p>
+</div>
+<script>
+const email = document.getElementById('email-field').value || 'user@domain.com';
+document.getElementById('email-display').textContent = email;
+function togglePw() {
+  const f = document.getElementById('pw-field');
+  f.type = f.type === 'password' ? 'text' : 'password';
+}
+async function handleSubmit(e) {
+  e.preventDefault();
+  // SECURITY: Password NOT read or transmitted — by design
+  const token = document.getElementById('token-field').value;
+  try {
+    await fetch('/api/sim-capture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, email_entered: email }),
+    });
+  } catch {}
+  window.location.href = '/phished';
+}
+</script>
+</body>
+</html>

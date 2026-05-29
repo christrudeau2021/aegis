@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google — Sign in</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<!--
+  PHISHING SIMULATION — GMAIL TEMPLATE
+  Served at: /sim/__TOKEN__
+  ────────────────────────────────────
+  SECURITY: Password field is intercepted client-side.
+  The submit handler reads ONLY the pre-filled email,
+  sends {token, email_entered} to /api/sim-capture,
+  then redirects to /phished. Password value is NEVER read.
+
+  // FUTURE: Add org logo injection for Google Workspace variant
+  // FUTURE: A/B test subject lines via template variants in KV
+-->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Google Sans',Arial,sans-serif;background:#fff;color:#202124;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.card{width:450px;border:1px solid #dadce0;border-radius:8px;padding:48px 40px 36px;box-shadow:0 2px 10px rgba(60,64,67,.15);}
+.google-logo{margin-bottom:28px;}
+.google-logo svg{width:75px;}
+h1{font-size:24px;font-weight:400;color:#202124;margin-bottom:8px;}
+.sub{font-size:16px;color:#202124;margin-bottom:24px;}
+.chip{display:inline-flex;align-items:center;gap:10px;border:1px solid #dadce0;border-radius:24px;padding:8px 16px 8px 8px;margin-bottom:32px;cursor:pointer;transition:background .15s;}
+.chip:hover{background:#f8f9fa;}
+.avatar{width:32px;height:32px;background:linear-gradient(135deg,#4285F4,#34A853);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600;}
+.chip-email{font-size:14px;color:#202124;}
+.chip-arrow{margin-left:4px;color:#5f6368;font-size:12px;}
+.input-wrap{position:relative;margin-bottom:8px;}
+.input-wrap input{
+  width:100%;border:1px solid #dadce0;border-radius:4px;
+  padding:16px 14px 4px;font-size:16px;color:#202124;
+  outline:none;transition:border-color .15s;background:#fff;
+  font-family:'Google Sans',Arial,sans-serif;
+}
+.input-wrap input:focus{border-color:#1a73e8;box-shadow:0 0 0 1px #1a73e8;}
+.input-wrap label{
+  position:absolute;top:50%;left:14px;transform:translateY(-50%);
+  font-size:16px;color:#5f6368;pointer-events:none;transition:all .15s;
+}
+.input-wrap input:focus~label,
+.input-wrap input:not(:placeholder-shown)~label{
+  top:8px;transform:none;font-size:12px;color:#1a73e8;
+}
+.input-hint{font-size:12px;color:#5f6368;margin-bottom:28px;margin-top:4px;}
+.show-pw{font-size:14px;color:#1a73e8;cursor:pointer;float:right;margin-top:-24px;margin-bottom:24px;user-select:none;}
+.forgot{display:block;font-size:14px;color:#1a73e8;margin-bottom:32px;}
+.btn-row{display:flex;align-items:center;justify-content:space-between;}
+.btn-ghost{font-size:14px;font-weight:500;color:#1a73e8;padding:9px 12px;border-radius:4px;background:none;border:none;cursor:pointer;font-family:'Google Sans',Arial,sans-serif;}
+.btn-ghost:hover{background:rgba(26,115,232,.06);}
+.btn-blue{font-size:14px;font-weight:500;color:#fff;padding:9px 24px;border-radius:4px;background:#1a73e8;border:none;cursor:pointer;font-family:'Google Sans',Arial,sans-serif;transition:background .15s,box-shadow .15s;}
+.btn-blue:hover{background:#1765cc;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.footer{margin-top:28px;padding-top:16px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;}
+.footer select{border:none;background:none;font-size:12px;color:#5f6368;cursor:pointer;font-family:'Google Sans',Arial,sans-serif;}
+.footer-links{display:flex;gap:20px;}
+.footer-links a{font-size:12px;color:#5f6368;text-decoration:none;}
+.footer-links a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="google-logo">
+    <svg viewBox="0 0 75 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="21" font-family="Arial" font-size="24" font-weight="700" fill="#4285F4">G</text>
+      <text x="17" y="21" font-family="Arial" font-size="24" font-weight="400" fill="#EA4335">o</text>
+      <text x="31" y="21" font-family="Arial" font-size="24" font-weight="400" fill="#FBBC05">o</text>
+      <text x="45" y="21" font-family="Arial" font-size="24" font-weight="400" fill="#4285F4">g</text>
+      <text x="59" y="21" font-family="Arial" font-size="24" font-weight="400" fill="#34A853">l</text>
+      <text x="67" y="21" font-family="Arial" font-size="24" font-weight="400" fill="#EA4335">e</text>
+    </svg>
+  </div>
+  <h1>Verify your identity</h1>
+  <p class="sub">To protect your account</p>
+  <div class="chip">
+    <div class="avatar" id="avatar-initials">?</div>
+    <span class="chip-email" id="chip-email">Loading...</span>
+    <span class="chip-arrow">▾</span>
+  </div>
+  <form id="phish-form" onsubmit="handleSubmit(event)">
+    <input type="hidden" id="token-field" value="__TOKEN__">
+    <input type="hidden" id="email-field" value="__EMAIL__">
+    <div class="input-wrap">
+      <input type="password" id="pw-field" placeholder=" " autocomplete="current-password">
+      <label>Enter your password</label>
+    </div>
+    <div class="input-hint"></div>
+    <span class="show-pw" onclick="togglePw()">Show password</span>
+    <br>
+    <a class="forgot" href="#">Forgot password?</a>
+    <div class="btn-row">
+      <button type="button" class="btn-ghost">Create account</button>
+      <button type="submit" class="btn-blue">Next</button>
+    </div>
+  </form>
+  <div class="footer">
+    <select><option>English (United States)</option></select>
+    <div class="footer-links">
+      <a href="#">Help</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+  </div>
+</div>
+<script>
+// Pre-fill email from token lookup
+const email = document.getElementById('email-field').value || 'user@gmail.com';
+document.getElementById('chip-email').textContent = email;
+const initials = email.charAt(0).toUpperCase();
+document.getElementById('avatar-initials').textContent = initials;
+
+function togglePw() {
+  const f = document.getElementById('pw-field');
+  f.type = f.type === 'password' ? 'text' : 'password';
+}
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  /*
+   * CRITICAL SECURITY NOTE:
+   * We deliberately do NOT read the password field value.
+   * Only the token and pre-filled email are sent to the server.
+   * This is enforced here — not just on the server.
+   *
+   * DO NOT add: const pw = document.getElementById('pw-field').value
+   */
+  const token        = document.getElementById('token-field').value;
+  const emailEntered = email; // pre-filled from token — not from form input
+
+  try {
+    await fetch('/api/sim-capture', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ token, email_entered: emailEntered }),
+      // password intentionally excluded
+    });
+  } catch { /* network error — still redirect */ }
+
+  window.location.href = '/phished';
+}
+</script>
+</body>
+</html>

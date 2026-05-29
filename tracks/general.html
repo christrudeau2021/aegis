@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis — Security Awareness Training | CyberShield</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#07111f;--bg-2:#0d1e33;--bg-3:#0a1928;--bg-4:#060f1a;
+      --border:rgba(59,158,255,0.15);
+      --blue:#3b9eff;--teal:#00d4a0;--text:#e8f0f8;--text-muted:#7a9ab8;
+      --danger:#ef4444;--warn:#f59e0b;
+      --font-serif:'DM Serif Display',Georgia,serif;
+      --font-sans:'DM Sans',system-ui,sans-serif;
+      --font-mono:'IBM Plex Mono',monospace;
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:16px;line-height:1.6;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(59,158,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,158,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(7,17,31,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+    .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .nav-brand-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:13px;color:var(--bg);}
+    .nav-brand-text{font-family:var(--font-serif);font-size:18px;color:var(--text);}
+    .nav-brand-sub{font-family:var(--font-mono);font-size:10px;color:var(--teal);letter-spacing:0.12em;text-transform:uppercase;}
+    .nav-role{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:0.06em;}
+    .nav-role span{color:var(--blue);}
+
+    .progress-wrap{position:relative;z-index:1;max-width:860px;margin:80px auto 0;padding:20px 40px 0;}
+    .progress-meta{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:0.08em;margin-bottom:8px;}
+    .progress-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));border-radius:2px;transition:width 0.5s cubic-bezier(0.4,0,0.2,1);}
+
+    .email-banner{position:relative;z-index:1;max-width:860px;margin:16px auto 0;padding:0 40px;}
+    .email-banner-inner{background:rgba(0,212,160,0.08);border:1px solid rgba(0,212,160,0.2);border-radius:8px;padding:12px 20px;display:flex;gap:12px;align-items:center;}
+    .email-banner-inner p{font-size:13px;color:#6ee7c7;line-height:1.5;}
+    .email-banner-inner strong{color:var(--teal);}
+
+    .modules{position:relative;z-index:1;max-width:860px;margin:24px auto 80px;padding:0 40px;}
+
+    /* MODULE CARDS */
+    .module{background:var(--bg-2);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden;transition:border-color 0.25s,box-shadow 0.25s;}
+    .module.active{border-color:rgba(59,158,255,0.45);box-shadow:0 0 0 1px rgba(59,158,255,0.08),0 4px 24px rgba(59,158,255,0.06);}
+    .module.completed{border-color:rgba(0,212,160,0.35);}
+    .module.locked{opacity:0.42;pointer-events:none;}
+
+    .mod-header{padding:18px 22px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;}
+    .mod-num{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;background:var(--bg-3);border:1px solid var(--border);color:var(--text-muted);transition:all 0.2s;}
+    .module.active .mod-num{background:rgba(59,158,255,0.12);border-color:var(--blue);color:var(--blue);}
+    .module.completed .mod-num{background:rgba(0,212,160,0.1);border-color:var(--teal);color:var(--teal);}
+    .mod-meta{flex:1;}
+    .mod-title{font-family:var(--font-serif);font-size:16px;margin-bottom:2px;}
+    .mod-sub{font-size:12px;color:var(--text-muted);font-family:var(--font-mono);}
+    .mod-badge{font-family:var(--font-mono);font-size:10px;padding:3px 10px;border-radius:20px;flex-shrink:0;letter-spacing:0.06em;}
+    .badge-active{background:rgba(59,158,255,0.1);color:var(--blue);}
+    .badge-done{background:rgba(0,212,160,0.08);color:var(--teal);}
+    .badge-locked{background:rgba(122,154,184,0.06);color:var(--text-muted);}
+
+    .mod-body{padding:0 22px 28px;border-top:1px solid var(--border);display:none;}
+    .module.active .mod-body,.module.open .mod-body{display:block;}
+
+    /* CONTENT */
+    .mod-body h3{font-family:var(--font-serif);font-size:19px;margin:20px 0 10px;}
+    .mod-body p{font-size:14px;color:var(--text-muted);line-height:1.72;margin-bottom:13px;}
+    .mod-body p strong{color:var(--text);}
+    .mod-body ul,.mod-body ol{margin:0 0 14px 22px;}
+    .mod-body li{font-size:14px;color:var(--text-muted);line-height:1.7;margin-bottom:5px;}
+    .mod-body li strong{color:var(--text);}
+    .mod-body code{font-family:var(--font-mono);font-size:12px;color:var(--blue);background:rgba(59,158,255,0.08);padding:2px 6px;border-radius:3px;}
+
+    .role-callout{background:rgba(59,158,255,0.05);border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:12px 16px;margin:14px 0;display:none;}
+    .role-callout.show{display:block;}
+    .role-callout p{font-size:13px;color:#93c5fd;margin:0;line-height:1.6;}
+    .role-callout p strong{color:var(--blue);}
+
+    .sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
+    .sig-card{padding:14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-3);}
+    .sig-card h4{font-size:12px;font-weight:600;color:var(--blue);margin-bottom:5px;}
+    .sig-card p{font-size:12px;color:var(--text-muted);line-height:1.55;margin:0;}
+
+    /* ══════════════════════════════════════
+       QUIZ — REDESIGNED
+    ══════════════════════════════════════ */
+    .quiz{margin-top:24px;padding-top:4px;}
+
+    .quiz-header-bar{
+      display:flex;align-items:center;gap:12px;
+      margin-bottom:20px;padding:10px 16px;
+      background:rgba(59,158,255,0.04);
+      border:1px solid rgba(59,158,255,0.1);
+      border-radius:8px;
+    }
+    .quiz-header-icon{font-size:16px;}
+    .quiz-header-text{font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:0.12em;text-transform:uppercase;}
+    .quiz-header-count{margin-left:auto;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);}
+
+    .quiz-item{margin-bottom:28px;}
+
+    /* Question panel — distinct block */
+    .quiz-question-panel{
+      background:var(--bg-4);
+      border:1px solid var(--border);
+      border-left:3px solid var(--blue);
+      border-radius:0 8px 8px 0;
+      padding:16px 18px;
+      margin-bottom:12px;
+      position:relative;
+    }
+    .quiz-q-num{
+      font-family:var(--font-mono);
+      font-size:9px;
+      letter-spacing:0.14em;
+      text-transform:uppercase;
+      color:var(--blue);
+      margin-bottom:7px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .quiz-q-num::after{content:'';flex:1;height:1px;background:rgba(59,158,255,0.12);}
+    .quiz-q-text{
+      font-size:14px;
+      font-weight:500;
+      color:var(--text);
+      line-height:1.65;
+    }
+    .quiz-q-text code{font-family:var(--font-mono);font-size:12px;color:var(--blue);background:rgba(59,158,255,0.1);padding:2px 6px;border-radius:3px;}
+
+    /* Answer options */
+    .quiz-answers-label{
+      font-family:var(--font-mono);
+      font-size:9px;
+      letter-spacing:0.14em;
+      color:var(--text-muted);
+      text-transform:uppercase;
+      margin-bottom:8px;
+      padding-left:2px;
+    }
+    .quiz-opts{display:flex;flex-direction:column;gap:6px;}
+    .qopt{
+      display:flex;align-items:flex-start;gap:12px;
+      padding:12px 16px;
+      border-radius:7px;
+      border:1px solid var(--border);
+      background:var(--bg-2);
+      font-size:13px;cursor:pointer;
+      transition:border-color 0.15s,background 0.15s,transform 0.1s;
+      text-align:left;color:var(--text);
+      font-family:var(--font-sans);line-height:1.55;
+      position:relative;overflow:hidden;
+    }
+    .qopt::before{
+      content:'';position:absolute;left:0;top:0;bottom:0;
+      width:3px;background:var(--border);
+      transition:background 0.15s;
+    }
+    .qopt:hover:not(:disabled){
+      border-color:rgba(59,158,255,0.35);
+      background:rgba(59,158,255,0.05);
+      transform:translateX(2px);
+    }
+    .qopt:hover:not(:disabled)::before{background:var(--blue);}
+    .qopt-letter{
+      flex-shrink:0;width:22px;height:22px;border-radius:4px;
+      background:rgba(59,158,255,0.08);border:1px solid rgba(59,158,255,0.15);
+      display:flex;align-items:center;justify-content:center;
+      font-family:var(--font-mono);font-size:10px;color:var(--text-muted);
+      transition:all 0.15s;margin-top:1px;
+    }
+    .qopt:hover:not(:disabled) .qopt-letter{background:rgba(59,158,255,0.15);color:var(--blue);}
+    .qopt.correct{border-color:var(--teal);background:rgba(0,212,160,0.06);transform:translateX(2px);}
+    .qopt.correct::before{background:var(--teal);}
+    .qopt.correct .qopt-letter{background:rgba(0,212,160,0.15);border-color:var(--teal);color:var(--teal);}
+    .qopt.wrong{border-color:rgba(239,68,68,0.5);background:rgba(239,68,68,0.05);}
+    .qopt.wrong::before{background:var(--danger);}
+    .qopt.wrong .qopt-letter{background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.4);color:#fca5a5;}
+    .qopt:disabled{cursor:default;transform:none;}
+
+    .quiz-fb{
+      margin-top:10px;padding:12px 16px;border-radius:7px;
+      font-size:13px;line-height:1.6;display:none;
+      border-left:3px solid transparent;
+    }
+    .quiz-fb.show{display:block;}
+    .quiz-fb.c{background:rgba(0,212,160,0.06);border:1px solid rgba(0,212,160,0.18);border-left-color:var(--teal);color:#6ee7c7;}
+    .quiz-fb.w{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);border-left-color:var(--danger);color:#fca5a5;}
+
+    .quiz-score-bar{
+      display:none;margin-top:14px;padding:10px 16px;border-radius:7px;
+      background:rgba(59,158,255,0.05);border:1px solid rgba(59,158,255,0.12);
+      font-family:var(--font-mono);font-size:12px;color:var(--text-muted);
+      display:none;align-items:center;gap:10px;
+    }
+    .quiz-score-bar.show{display:flex;}
+    .score-dots{display:flex;gap:4px;}
+    .score-dot{width:10px;height:10px;border-radius:50%;background:var(--border);}
+    .score-dot.hit{background:var(--teal);}
+    .score-dot.miss{background:rgba(239,68,68,0.5);}
+
+    .btn-continue{
+      margin-top:20px;padding:11px 28px;
+      background:linear-gradient(135deg,var(--blue),var(--teal));
+      color:var(--bg);font-weight:600;font-size:13px;border:none;
+      border-radius:6px;cursor:pointer;font-family:var(--font-sans);
+      transition:opacity 0.2s,transform 0.15s;letter-spacing:0.02em;
+    }
+    .btn-continue:hover{opacity:0.9;transform:translateY(-1px);}
+    .btn-continue:disabled{opacity:0.3;cursor:default;transform:none;}
+
+    /* COMPLETION */
+    .completion{
+      background:var(--bg-2);border:1px solid rgba(0,212,160,0.3);
+      border-radius:12px;padding:56px 40px;text-align:center;
+      margin-top:14px;display:none;
+      background-image:radial-gradient(ellipse at 50% 0%,rgba(0,212,160,0.06) 0%,transparent 60%);
+    }
+    .completion h2{font-family:var(--font-serif);font-size:32px;margin-bottom:10px;}
+    .completion p{font-size:14px;color:var(--text-muted);max-width:480px;margin:0 auto 16px;line-height:1.65;}
+    .cert-pill{display:inline-block;padding:6px 18px;background:rgba(0,212,160,0.1);border:1px solid rgba(0,212,160,0.3);border-radius:20px;font-family:var(--font-mono);font-size:11px;color:var(--teal);margin-bottom:24px;}
+
+    .cert-card{
+      max-width:540px;margin:0 auto 28px;
+      background:var(--bg-3);
+      border:1px solid rgba(0,212,160,0.2);
+      border-radius:10px;padding:32px 36px;
+      position:relative;overflow:hidden;
+      text-align:left;
+    }
+    .cert-card::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--blue),var(--teal));
+    }
+    .cert-card::after{
+      content:'AEGIS';
+      position:absolute;right:-8px;bottom:-20px;
+      font-family:var(--font-serif);font-size:72px;
+      color:rgba(0,212,160,0.05);line-height:1;
+      pointer-events:none;letter-spacing:-2px;
+    }
+    .cert-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+    .cert-brand{font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;color:var(--text-muted);text-transform:uppercase;}
+    .cert-brand strong{color:var(--blue);display:block;font-size:13px;margin-top:2px;letter-spacing:0.04em;}
+    .cert-shield{width:40px;height:40px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+    .cert-divider{height:1px;background:var(--border);margin:16px 0;}
+    .cert-label{font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;}
+    .cert-name{font-family:var(--font-serif);font-size:22px;color:var(--text);margin-bottom:14px;}
+    .cert-detail{font-size:13px;color:var(--text-muted);margin-bottom:6px;}
+    .cert-detail strong{color:var(--text);}
+    .cert-footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+    .cert-sig{font-family:var(--font-serif);font-style:italic;font-size:15px;color:var(--text-muted);}
+    .cert-sig span{display:block;font-family:var(--font-mono);font-style:normal;font-size:9px;letter-spacing:0.1em;color:var(--text-muted);margin-top:3px;text-transform:uppercase;}
+    .cert-date{font-family:var(--font-mono);font-size:10px;color:var(--text-muted);text-align:right;}
+
+    .btn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+    .btn-dl{
+      padding:11px 24px;
+      background:linear-gradient(135deg,var(--blue),var(--teal));
+      color:var(--bg);font-weight:600;font-size:13px;border:none;
+      border-radius:6px;cursor:pointer;font-family:var(--font-sans);
+      transition:opacity 0.2s;display:inline-flex;align-items:center;gap:8px;
+    }
+    .btn-dl:hover{opacity:0.9;}
+    .btn-outline{
+      padding:10px 22px;border:1px solid var(--border);
+      background:transparent;color:var(--text-muted);font-size:13px;
+      border-radius:6px;cursor:pointer;font-family:var(--font-sans);
+      text-decoration:none;display:inline-block;
+      transition:border-color 0.2s,color 0.2s;
+    }
+    .btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+    .btn-tech{
+      padding:11px 24px;
+      background:rgba(245,158,11,0.1);
+      border:1px solid rgba(245,158,11,0.35);
+      color:var(--warn);font-weight:600;font-size:13px;
+      border-radius:6px;cursor:pointer;font-family:var(--font-sans);
+      transition:background 0.2s,border-color 0.2s;
+      display:inline-flex;align-items:center;gap:8px;
+    }
+    .btn-tech:hover{background:rgba(245,158,11,0.18);border-color:rgba(245,158,11,0.6);}
+    .btn-tech{text-decoration:none;}
+
+    /* PRINT / PDF */
+    @media print{
+      body>*:not(#certPrintPage){display:none!important;}
+      #certPrintPage{display:block!important;position:fixed;inset:0;background:#fff;z-index:9999;padding:60px;}
+    }
+    #certPrintPage{display:none;}
+
+    @media(max-width:680px){
+      nav{padding:0 16px;}
+      .progress-wrap,.email-banner,.modules{padding-left:16px;padding-right:16px;}
+      .sig-grid{grid-template-columns:1fr;}
+      .cert-card{padding:24px 20px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- PRINT CERTIFICATE PAGE (hidden until print) -->
+<div id="certPrintPage"></div>
+
+<nav>
+  <a href="/" class="nav-brand">
+    <div class="nav-brand-icon">Æ</div>
+    <div><div class="nav-brand-text">Aegis</div><div class="nav-brand-sub">by CyberShield</div></div>
+  </a>
+  <div class="nav-role">General Awareness &nbsp;·&nbsp; <span id="navRole">—</span></div>
+</nav>
+
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span>// General Awareness Track — 8 Modules</span>
+    <span id="progressText">0 of 8 complete</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<div class="email-banner">
+  <div class="email-banner-inner">
+    <span style="font-size:20px;flex-shrink:0">📬</span>
+    <p><strong>Your simulation email is en route.</strong> Complete training first — then apply what you've learned when it arrives.</p>
+  </div>
+</div>
+
+<div class="modules" id="moduleList">
+
+  <!-- MODULE 1 -->
+  <div class="module active" id="mod1">
+    <div class="mod-header" onclick="toggleMod('mod1')">
+      <div class="mod-num">01</div>
+      <div class="mod-meta"><div class="mod-title">What is phishing?</div><div class="mod-sub">// The anatomy of a social engineering attack</div></div>
+      <span class="mod-badge badge-active">In progress</span>
+    </div>
+    <div class="mod-body">
+      <h3>Phishing is manipulation, not malware.</h3>
+      <p>Phishing attacks don't break through your defenses — they walk right past them by targeting human judgment. The attacker's goal is to get you to act before your critical thinking engages: click a link, enter credentials, transfer funds, or open an attachment.</p>
+      <p>Unlike technical exploits, phishing works regardless of how up-to-date your systems are. <strong>Your behavior is the control being bypassed.</strong></p>
+      <div class="role-callout" id="callout-mod1-executive"><p><strong>For Executives & Partners:</strong> Senior leaders are the most valuable target. Attackers research your title, authority, and relationships to craft highly personalized "spear phishing" emails that appear to come from board members, auditors, or regulators.</p></div>
+      <div class="role-callout" id="callout-mod1-finance"><p><strong>For Finance & Accounting:</strong> Your role makes you a primary target for Business Email Compromise — attackers impersonating executives to authorize wire transfers, redirect payroll, or share financial data.</p></div>
+      <div class="role-callout" id="callout-mod1-hr"><p><strong>For HR & People Ops:</strong> HR is targeted for W-2 forms, direct deposit changes, and employee PII. Attackers often impersonate executives requesting employee data urgently before an "audit."</p></div>
+      <div class="role-callout" id="callout-mod1-legal"><p><strong>For Legal & Compliance:</strong> You handle confidential agreements, M&A data, and privileged communications — all high-value targets. Attackers may impersonate opposing counsel, regulators, or court systems.</p></div>
+      <div class="role-callout" id="callout-mod1-it"><p><strong>For IT & Security:</strong> You hold privileged access. Attackers target IT staff specifically to gain admin credentials — a "helpdesk" call asking you to reset a VPN token for an urgent issue is a classic vector.</p></div>
+      <div class="role-callout" id="callout-mod1-developer"><p><strong>For Developers:</strong> Developer accounts have access to source code, CI/CD pipelines, and cloud infrastructure. A compromised developer account can be used to inject malicious code or access production secrets.</p></div>
+      <div class="sig-grid">
+        <div class="sig-card"><h4>📧 Email phishing</h4><p>Mass or targeted emails impersonating trusted brands, colleagues, or authorities.</p></div>
+        <div class="sig-card"><h4>🎯 Spear phishing</h4><p>Highly targeted with personal details — name, role, org, recent events — to appear legitimate.</p></div>
+        <div class="sig-card"><h4>📱 Smishing / Vishing</h4><p>Same tactics via SMS or phone. "This is IT support — your account has been flagged."</p></div>
+        <div class="sig-card"><h4>👔 Business Email Compromise</h4><p>Impersonating a CEO or CFO to authorize wire transfers or share confidential data.</p></div>
+      </div>
+      <div class="quiz">
+        <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Knowledge Check</span><span class="quiz-header-count" id="qcount-mod1">0 / 3 answered</span></div>
+        <div class="quiz-item" id="q1-1">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">What makes phishing different from most cyberattacks?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q1-1',false,'mod1')"><span class="qopt-letter">A</span>It uses advanced malware that bypasses antivirus software.</button>
+            <button class="qopt" onclick="answer(this,'q1-1',true,'mod1')"><span class="qopt-letter">B</span>It exploits human behavior rather than technical vulnerabilities.</button>
+            <button class="qopt" onclick="answer(this,'q1-1',false,'mod1')"><span class="qopt-letter">C</span>It only works if the target is using an outdated operating system.</button>
+            <button class="qopt" onclick="answer(this,'q1-1',false,'mod1')"><span class="qopt-letter">D</span>It requires the attacker to already have access to your network.</button>
+          </div>
+          <div class="quiz-fb c" id="q1-1-c">✓ Correct. Phishing bypasses technical defenses entirely by manipulating people into acting willingly — no patch or firewall stops that.</div>
+          <div class="quiz-fb w" id="q1-1-w">Phishing's power is that it targets human judgment, not software. It works even on fully patched, secured systems.</div>
+        </div>
+        <div class="quiz-item" id="q1-2">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">Which type of phishing is most dangerous to senior executives and high-value targets?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q1-2',false,'mod1')"><span class="qopt-letter">A</span>Mass phishing campaigns sent to thousands of recipients</button>
+            <button class="qopt" onclick="answer(this,'q1-2',true,'mod1')"><span class="qopt-letter">B</span>Spear phishing — personalized attacks using researched personal and professional details</button>
+            <button class="qopt" onclick="answer(this,'q1-2',false,'mod1')"><span class="qopt-letter">C</span>Smishing — phishing attacks via SMS</button>
+            <button class="qopt" onclick="answer(this,'q1-2',false,'mod1')"><span class="qopt-letter">D</span>Vishing — phishing attacks via phone calls</button>
+          </div>
+          <div class="quiz-fb c" id="q1-2-c">✓ Correct. Spear phishing is customized using your name, role, relationships, and recent events — far more convincing than mass campaigns.</div>
+          <div class="quiz-fb w" id="q1-2-w">Spear phishing is the most dangerous for high-value targets. Personalization using researched details makes it hard to distinguish from legitimate communications.</div>
+        </div>
+        <div class="quiz-item" id="q1-3">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">A vendor emails asking you to update their banking information for an upcoming payment. You weren't expecting this. What should you do first?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q1-3',false,'mod1')"><span class="qopt-letter">A</span>Update the banking info — vendors do change bank accounts.</button>
+            <button class="qopt" onclick="answer(this,'q1-3',false,'mod1')"><span class="qopt-letter">B</span>Reply to the email to confirm the request is legitimate.</button>
+            <button class="qopt" onclick="answer(this,'q1-3',true,'mod1')"><span class="qopt-letter">C</span>Call the vendor using a phone number you already have on file — not from the email.</button>
+            <button class="qopt" onclick="answer(this,'q1-3',false,'mod1')"><span class="qopt-letter">D</span>Forward to your finance team and let them decide.</button>
+          </div>
+          <div class="quiz-fb c" id="q1-3-c">✓ Correct. Out-of-band verification using known contact information is the standard response. Replying to the email just contacts the attacker.</div>
+          <div class="quiz-fb w" id="q1-3-w">Vendor banking change requests are a common BEC vector. Always verify via a phone number you already have — not one from the suspicious message.</div>
+        </div>
+        <div class="quiz-score-bar" id="score-mod1"><span class="score-dots" id="dots-mod1"></span><span id="scoretext-mod1">—</span></div>
+        <button class="btn-continue" id="mod1-btn" disabled onclick="completeMod('mod1','mod2')">Continue to Module 2 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 2 -->
+  <div class="module locked" id="mod2">
+    <div class="mod-header" onclick="toggleMod('mod2')">
+      <div class="mod-num">02</div>
+      <div class="mod-meta"><div class="mod-title">How to spot a phishing attack</div><div class="mod-sub">// Six signals every target misses</div></div>
+      <span class="mod-badge badge-locked">Locked</span>
+    </div>
+    <div class="mod-body">
+      <h3>Every attack leaves traces. Urgency makes you skip the checks that catch them.</h3>
+      <p>Phishing emails are designed to create pressure that overrides careful thinking. The signals are consistent — once you know them, they're hard to miss.</p>
+      <div class="sig-grid">
+        <div class="sig-card"><h4>1. Sender domain mismatch</h4><p>Display name says "Microsoft" — actual domain is <code>microsoft-secure.net</code>. Always check the real sending address.</p></div>
+        <div class="sig-card"><h4>2. Artificial urgency</h4><p>"Act within 24 hours or lose access." Urgency is the primary manipulation lever. Legitimate services rarely threaten immediate lockout.</p></div>
+        <div class="sig-card"><h4>3. URL mismatch</h4><p>Hover before clicking. The real domain is the part just before the first slash after <code>https://</code>. Subdomains before it can be anything.</p></div>
+        <div class="sig-card"><h4>4. Unexpected request</h4><p>Did you initiate this? If you didn't request a password reset, why did one arrive?</p></div>
+        <div class="sig-card"><h4>5. Generic or suspicious greeting</h4><p>"Dear Customer" is suspicious. Even your name doesn't confirm legitimacy — attackers harvest names from data breaches.</p></div>
+        <div class="sig-card"><h4>6. No MFA prompt on "login"</h4><p>Real logins to modern platforms prompt for multi-factor authentication. A page that only asks for a password is a red flag.</p></div>
+      </div>
+      <div class="role-callout" id="callout-mod2-finance"><p><strong>Finance red flags:</strong> Payment redirect requests, invoice "discrepancies" requiring urgent action, and CEO/CFO impersonation are the most common vectors targeting your department.</p></div>
+      <div class="role-callout" id="callout-mod2-it"><p><strong>IT/Security red flags:</strong> Attackers targeting IT often use "helpdesk escalation" themes — urgent tickets, system alerts, or vendor security notifications requesting credential verification.</p></div>
+      <div class="role-callout" id="callout-mod2-legal"><p><strong>Legal red flags:</strong> Watch for fake court notifications, "encrypted document" sharing from opposing counsel, and bar association compliance notices requiring login.</p></div>
+      <div class="quiz">
+        <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Knowledge Check</span><span class="quiz-header-count" id="qcount-mod2">0 / 4 answered</span></div>
+        <div class="quiz-item" id="q2-1">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">You receive an urgent email from "IT Security" with sender address <code>it-security@company-helpdesk.net</code>. Your company's domain is <code>yourcompany.com</code>. What's wrong here?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q2-1',false,'mod2')"><span class="qopt-letter">A</span>Nothing — IT helpdesk sometimes uses third-party platforms.</button>
+            <button class="qopt" onclick="answer(this,'q2-1',true,'mod2')"><span class="qopt-letter">B</span>The sending domain does not match the company's real domain — a strong indicator of phishing.</button>
+            <button class="qopt" onclick="answer(this,'q2-1',false,'mod2')"><span class="qopt-letter">C</span>The email is suspicious only because it mentions "security."</button>
+            <button class="qopt" onclick="answer(this,'q2-1',false,'mod2')"><span class="qopt-letter">D</span>The email is probably fine if the content looks professional.</button>
+          </div>
+          <div class="quiz-fb c" id="q2-1-c">✓ Correct. Domain mismatch is one of the most reliable indicators. Professional-looking content can be copied in minutes — the domain cannot be faked in the same way.</div>
+          <div class="quiz-fb w" id="q2-1-w">The sending domain is the most reliable check. <code>company-helpdesk.net</code> is not your company's domain. Legitimate internal IT communications always come from your actual domain.</div>
+        </div>
+        <div class="quiz-item" id="q2-2">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">You hover over a link and see: <code>https://login.microsoft.com.account-verify.info/secure</code>. Is this a legitimate Microsoft link?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q2-2',false,'mod2')"><span class="qopt-letter">A</span>Yes — it starts with login.microsoft.com which is Microsoft's real domain.</button>
+            <button class="qopt" onclick="answer(this,'q2-2',false,'mod2')"><span class="qopt-letter">B</span>Possibly — it uses HTTPS so it might be secure.</button>
+            <button class="qopt" onclick="answer(this,'q2-2',true,'mod2')"><span class="qopt-letter">C</span>No — the actual domain is account-verify.info, not microsoft.com.</button>
+            <button class="qopt" onclick="answer(this,'q2-2',false,'mod2')"><span class="qopt-letter">D</span>Can't tell without clicking it.</button>
+          </div>
+          <div class="quiz-fb c" id="q2-2-c">✓ Correct. The real domain is the segment just before the first single slash. <code>login.microsoft.com</code> is just a subdomain of <code>account-verify.info</code> — a domain the attacker controls.</div>
+          <div class="quiz-fb w" id="q2-2-w">HTTPS only means the connection is encrypted, not that the site is legitimate. The real domain in a URL is just before the first slash: <code>account-verify.info</code>.</div>
+        </div>
+        <div class="quiz-item" id="q2-3">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">Why is urgency used in phishing attacks?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q2-3',false,'mod2')"><span class="qopt-letter">A</span>Urgent emails are less likely to be flagged by spam filters.</button>
+            <button class="qopt" onclick="answer(this,'q2-3',false,'mod2')"><span class="qopt-letter">B</span>Most IT support requests are genuinely urgent.</button>
+            <button class="qopt" onclick="answer(this,'q2-3',true,'mod2')"><span class="qopt-letter">C</span>Urgency activates a stress response that causes people to skip verification steps they would otherwise take.</button>
+            <button class="qopt" onclick="answer(this,'q2-3',false,'mod2')"><span class="qopt-letter">D</span>Attackers want you to respond before their access window closes.</button>
+          </div>
+          <div class="quiz-fb c" id="q2-3-c">✓ Correct. Under time pressure, people rely on fast intuitive thinking rather than careful analysis — exactly when verification steps get skipped.</div>
+          <div class="quiz-fb w" id="q2-3-w">Urgency is a deliberate psychological trigger. When you feel pressed for time, critical analysis gets bypassed. If an email creates urgency, treat it as a signal to slow down.</div>
+        </div>
+        <div class="quiz-item" id="q2-4">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 4</div><div class="quiz-q-text">Your CEO emails asking for an urgent wire transfer. The most important verification step is:</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q2-4',false,'mod2')"><span class="qopt-letter">A</span>Check whether the email looks professionally formatted.</button>
+            <button class="qopt" onclick="answer(this,'q2-4',false,'mod2')"><span class="qopt-letter">B</span>Reply to the email asking the CEO to confirm.</button>
+            <button class="qopt" onclick="answer(this,'q2-4',true,'mod2')"><span class="qopt-letter">C</span>Call the CEO on a phone number you already have on file — not any number from the email.</button>
+            <button class="qopt" onclick="answer(this,'q2-4',false,'mod2')"><span class="qopt-letter">D</span>Check whether your email server marked it as spam.</button>
+          </div>
+          <div class="quiz-fb c" id="q2-4-c">✓ Correct. Out-of-band verification via a known contact is the gold standard. Every other check can be faked — a direct voice call to a known number cannot.</div>
+          <div class="quiz-fb w" id="q2-4-w">Replying to the email contacts the attacker. The only reliable verification is a call to a number you already have from your directory.</div>
+        </div>
+        <div class="quiz-score-bar" id="score-mod2"><span class="score-dots" id="dots-mod2"></span><span id="scoretext-mod2">—</span></div>
+        <button class="btn-continue" id="mod2-btn" disabled onclick="completeMod('mod2','mod3')">Continue to Module 3 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 3 -->
+  <div class="module locked" id="mod3">
+    <div class="mod-header" onclick="toggleMod('mod3')">
+      <div class="mod-num">03</div>
+      <div class="mod-meta"><div class="mod-title">Data classification & protection</div><div class="mod-sub">// Not all data carries the same risk</div></div>
+      <span class="mod-badge badge-locked">Locked</span>
+    </div>
+    <div class="mod-body">
+      <h3>Knowing what you're protecting changes how you protect it.</h3>
+      <p>Organizations classify data to match the level of protection to the level of risk.</p>
+      <ul>
+        <li><strong>Confidential / Restricted:</strong> Trade secrets, M&A data, source code, legal privileged communications, patient records, credentials. Requires encryption at rest and in transit, strict access controls, audit logging.</li>
+        <li><strong>Personal Information (PI):</strong> Any information about an identified or identifiable individual — name, email, address, phone. Subject to privacy regulations.</li>
+        <li><strong>Sensitive Personal Information (SPI):</strong> Subset of PI where misuse causes greater harm — health records, financial account numbers, SSNs. Treated as Confidential.</li>
+        <li><strong>Regulated Information:</strong> Payment card data (PCI-DSS), health records (HIPAA), financial records (SOX). Additional controls apply.</li>
+        <li><strong>Internal:</strong> Business information not for public disclosure but not highly sensitive — memos, process docs.</li>
+        <li><strong>Public:</strong> Intentionally released — press releases, published website content.</li>
+      </ul>
+      <div class="role-callout" id="callout-mod3-hr"><p><strong>For HR:</strong> Employee records contain both PI and SPI. W-2 requests, direct deposit changes, and employment verification require strict verification procedures.</p></div>
+      <div class="role-callout" id="callout-mod3-finance"><p><strong>For Finance:</strong> Payment card data, bank account information, and financial statements all carry regulatory requirements. Transmitting this data outside encrypted channels is a compliance violation.</p></div>
+      <div class="role-callout" id="callout-mod3-legal"><p><strong>For Legal:</strong> Privileged communications represent some of the most sensitive Confidential data. Accidental disclosure — wrong recipient, unencrypted attachments — can waive privilege.</p></div>
+      <div class="quiz">
+        <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Knowledge Check</span><span class="quiz-header-count" id="qcount-mod3">0 / 3 answered</span></div>
+        <div class="quiz-item" id="q3-1">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">A colleague asks you to email them a spreadsheet with employee names, salaries, and direct deposit account numbers. What classification applies?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q3-1',false,'mod3')"><span class="qopt-letter">A</span>Internal — it's just internal HR data.</button>
+            <button class="qopt" onclick="answer(this,'q3-1',true,'mod3')"><span class="qopt-letter">B</span>SPI and potentially Regulated — requires encrypted transmission and verified authorization.</button>
+            <button class="qopt" onclick="answer(this,'q3-1',false,'mod3')"><span class="qopt-letter">C</span>Public — employees know their own salary.</button>
+            <button class="qopt" onclick="answer(this,'q3-1',false,'mod3')"><span class="qopt-letter">D</span>Confidential, but an internal email is fine for sharing it.</button>
+          </div>
+          <div class="quiz-fb c" id="q3-1-c">✓ Correct. Employee financial data is SPI — bank account numbers may be regulated. Verify the request, confirm need-to-know, and use encrypted transmission.</div>
+          <div class="quiz-fb w" id="q3-1-w">This data contains SPI and is subject to regulatory requirements. An unencrypted internal email is not appropriate transmission, and the request should be verified before any data is shared.</div>
+        </div>
+        <div class="quiz-item" id="q3-2">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">Confidential data must be encrypted in which situations?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q3-2',false,'mod3')"><span class="qopt-letter">A</span>Only when transmitted over the public internet.</button>
+            <button class="qopt" onclick="answer(this,'q3-2',false,'mod3')"><span class="qopt-letter">B</span>Only when stored on portable devices like laptops or USB drives.</button>
+            <button class="qopt" onclick="answer(this,'q3-2',true,'mod3')"><span class="qopt-letter">C</span>Both at rest (stored) and in transit across any network, including internal networks.</button>
+            <button class="qopt" onclick="answer(this,'q3-2',false,'mod3')"><span class="qopt-letter">D</span>Only when accessed by users outside the organization.</button>
+          </div>
+          <div class="quiz-fb c" id="q3-2-c">✓ Correct. Confidential data requires encryption both at rest and in transit — including internal networks. Internal networks are not inherently secure.</div>
+          <div class="quiz-fb w" id="q3-2-w">The standard requires encryption at rest and in transit across any network. A compromised endpoint on your internal network can access unencrypted data traversing that network.</div>
+        </div>
+        <div class="quiz-item" id="q3-3">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">You find a shared drive folder with unencrypted patient names and treatment records, owner unknown. What should you do?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q3-3',false,'mod3')"><span class="qopt-letter">A</span>Leave it — it's on an internal drive so it's probably fine.</button>
+            <button class="qopt" onclick="answer(this,'q3-3',false,'mod3')"><span class="qopt-letter">B</span>Delete the files to protect patients' privacy.</button>
+            <button class="qopt" onclick="answer(this,'q3-3',false,'mod3')"><span class="qopt-letter">C</span>Move the files to a secured folder.</button>
+            <button class="qopt" onclick="answer(this,'q3-3',true,'mod3')"><span class="qopt-letter">D</span>Report to your security or compliance team immediately — do not modify, move, or delete without their direction.</button>
+          </div>
+          <div class="quiz-fb c" id="q3-3-c">✓ Correct. This is a potential data exposure event. Do not alter the evidence — report it and let the security team assess scope and regulatory notification requirements.</div>
+          <div class="quiz-fb w" id="q3-3-w">Moving or deleting files could destroy evidence and complicate required regulatory notifications. Report it and let security or compliance lead the response.</div>
+        </div>
+        <div class="quiz-score-bar" id="score-mod3"><span class="score-dots" id="dots-mod3"></span><span id="scoretext-mod3">—</span></div>
+        <button class="btn-continue" id="mod3-btn" disabled onclick="completeMod('mod3','mod4')">Continue to Module 4 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 4 -->
+  <div class="module locked" id="mod4">
+    <div class="mod-header" onclick="toggleMod('mod4')">
+      <div class="mod-num">04</div>
+      <div class="mod-meta"><div class="mod-title">Access control fundamentals</div><div class="mod-sub">// Who can access what — and why it matters</div></div>
+      <span class="mod-badge badge-locked">Locked</span>
+    </div>
+    <div class="mod-body">
+      <h3>Access should be earned, scoped, and regularly reviewed.</h3>
+      <p>Most breaches involve either compromised credentials or access that should have been revoked.</p>
+      <ul>
+        <li><strong>Need-to-know / Least Privilege:</strong> Access is granted only for what a role requires. An accountant doesn't need source code access.</li>
+        <li><strong>Unique identities:</strong> Every person must have their own account. Shared accounts make accountability impossible.</li>
+        <li><strong>Timely deprovisioning:</strong> Access must be removed within 24 hours of someone leaving or changing roles.</li>
+        <li><strong>Periodic review:</strong> Access rights must be reviewed at least annually.</li>
+        <li><strong>Privileged access:</strong> Admin access requires stricter controls — separate accounts, enhanced logging, more frequent review.</li>
+      </ul>
+      <div class="role-callout" id="callout-mod4-it"><p><strong>For IT & Security:</strong> Common failures include: access requests approved without documented business need, accounts not disabled within SLA after termination, and shared administrative passwords. Each is an audit finding and a breach risk.</p></div>
+      <div class="role-callout" id="callout-mod4-executive"><p><strong>For Executives:</strong> Your accounts are high-value targets. If you use a shared assistant account, an attacker who compromises the assistant gains your access without triggering your MFA.</p></div>
+      <div class="quiz">
+        <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Knowledge Check</span><span class="quiz-header-count" id="qcount-mod4">0 / 3 answered</span></div>
+        <div class="quiz-item" id="q4-1">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">A project manager says "Just use my login — it's faster than waiting for IT to provision accounts." What should you do?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q4-1',false,'mod4')"><span class="qopt-letter">A</span>Use the shared login — it's a temporary situation.</button>
+            <button class="qopt" onclick="answer(this,'q4-1',false,'mod4')"><span class="qopt-letter">B</span>Use it but change the password afterward.</button>
+            <button class="qopt" onclick="answer(this,'q4-1',true,'mod4')"><span class="qopt-letter">C</span>Request individual accounts from IT — shared credentials eliminate individual accountability.</button>
+            <button class="qopt" onclick="answer(this,'q4-1',false,'mod4')"><span class="qopt-letter">D</span>Use it once and then escalate to IT for permanent access.</button>
+          </div>
+          <div class="quiz-fb c" id="q4-1-c">✓ Correct. Shared credentials are prohibited regardless of how temporary. If something goes wrong, there is no way to determine who did what.</div>
+          <div class="quiz-fb w" id="q4-1-w">Shared credentials are never acceptable — even temporarily. Individual accountability requires individual accounts.</div>
+        </div>
+        <div class="quiz-item" id="q4-2">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">An employee transfers to a different team. What happens to their access to your team's systems?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q4-2',false,'mod4')"><span class="qopt-letter">A</span>Nothing — they might need it for transition support.</button>
+            <button class="qopt" onclick="answer(this,'q4-2',false,'mod4')"><span class="qopt-letter">B</span>Revoke it after 30 days to allow for transition.</button>
+            <button class="qopt" onclick="answer(this,'q4-2',true,'mod4')"><span class="qopt-letter">C</span>Access should be reviewed and revoked when there is no longer a business need — any transition access must be explicitly approved and time-limited.</button>
+            <button class="qopt" onclick="answer(this,'q4-2',false,'mod4')"><span class="qopt-letter">D</span>Ask the employee if they still need access.</button>
+          </div>
+          <div class="quiz-fb c" id="q4-2-c">✓ Correct. Access follows role changes immediately. Transition access, if genuinely needed, must be formally approved with an expiration date.</div>
+          <div class="quiz-fb w" id="q4-2-w">"They might need it" is not an acceptable access justification. Any transition need must be documented, approved, and time-limited.</div>
+        </div>
+        <div class="quiz-item" id="q4-3">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">How quickly must access be disabled when an employee is terminated?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q4-3',false,'mod4')"><span class="qopt-letter">A</span>Within one week, to allow for knowledge transfer.</button>
+            <button class="qopt" onclick="answer(this,'q4-3',false,'mod4')"><span class="qopt-letter">B</span>Within 72 hours of their last working day.</button>
+            <button class="qopt" onclick="answer(this,'q4-3',true,'mod4')"><span class="qopt-letter">C</span>Within 24 hours of termination — immediately for involuntary terminations.</button>
+            <button class="qopt" onclick="answer(this,'q4-3',false,'mod4')"><span class="qopt-letter">D</span>After their final paycheck clears.</button>
+          </div>
+          <div class="quiz-fb c" id="q4-3-c">✓ Correct. 24 hours is the maximum for normal separations. For involuntary terminations, access is disabled at or before notification — preventing retaliatory data exfiltration.</div>
+          <div class="quiz-fb w" id="q4-3-w">The standard is 24 hours maximum for normal separations, immediate for involuntary ones. Former employees with active credentials represent a significant insider threat risk.</div>
+        </div>
+        <div class="quiz-score-bar" id="score-mod4"><span class="score-dots" id="dots-mod4"></span><span id="scoretext-mod4">—</span></div>
+        <button class="btn-continue" id="mod4-btn" disabled onclick="completeMod('mod4','mod5')">Continue to Module 5 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 5 -->
+  <div class="module locked" id="mod5">
+    <div class="mod-header" onclick="toggleMod('mod5')">
+      <div class="mod-num">05</div>
+      <div class="mod-meta"><div class="mod-title">Passwords, authentication & MFA</div><div class="mod-sub">// The first line of identity defense</div></div>
+      <span class="mod-badge badge-locked">Locked</span>
+    </div>
+    <div class="mod-body">
+      <h3>A password alone is not enough.</h3>
+      <p>Passwords are regularly compromised through phishing, credential stuffing, and brute-force. MFA ensures a stolen password alone cannot provide access.</p>
+      <ul>
+        <li><strong>Minimum 15 characters</strong> — length is the primary driver of strength.</li>
+        <li><strong>Mix of at least 2 character types.</strong></li>
+        <li><strong>Changed at minimum every 90 days</strong> or immediately upon any suspicion of compromise.</li>
+        <li><strong>Unique per system</strong> — reuse means one breach compromises all others.</li>
+        <li><strong>Never stored in clear text</strong> — use a password manager.</li>
+        <li><strong>Never shared</strong> with colleagues, assistants, or family members.</li>
+      </ul>
+      <p><strong>MFA fatigue attacks:</strong> If attackers have your password, they can repeatedly trigger MFA prompts hoping you'll approve one to make them stop. <strong>Never approve an MFA prompt you didn't initiate.</strong> Report unexpected prompts to IT immediately.</p>
+      <div class="quiz">
+        <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Knowledge Check</span><span class="quiz-header-count" id="qcount-mod5">0 / 3 answered</span></div>
+        <div class="quiz-item" id="q5-1">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">You receive three MFA push notifications in quick succession that you did not initiate. What does this indicate?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q5-1',false,'mod5')"><span class="qopt-letter">A</span>A technical glitch — approve one to clear it.</button>
+            <button class="qopt" onclick="answer(this,'q5-1',true,'mod5')"><span class="qopt-letter">B</span>Someone has your password and is attempting an MFA fatigue attack. Do not approve. Report to IT immediately.</button>
+            <button class="qopt" onclick="answer(this,'q5-1',false,'mod5')"><span class="qopt-letter">C</span>Your account is being protected — this is normal security behavior.</button>
+            <button class="qopt" onclick="answer(this,'q5-1',false,'mod5')"><span class="qopt-letter">D</span>Approve one and then change your password afterward.</button>
+          </div>
+          <div class="quiz-fb c" id="q5-1-c">✓ Correct. Unsolicited MFA prompts almost always mean your password is compromised. Do not approve. Report immediately so IT can investigate.</div>
+          <div class="quiz-fb w" id="q5-1-w">Unsolicited MFA prompts indicate your password has been compromised. The attack relies on flooding you until you approve one. Never approve a prompt you didn't initiate.</div>
+        </div>
+        <div class="quiz-item" id="q5-2">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">Which of the following is the strongest password?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q5-2',false,'mod5')"><span class="qopt-letter">A</span>P@ssw0rd123! (11 characters, complex)</button>
+            <button class="qopt" onclick="answer(this,'q5-2',false,'mod5')"><span class="qopt-letter">B</span>Tr0ub4dor&3 (11 characters, mixed)</button>
+            <button class="qopt" onclick="answer(this,'q5-2',true,'mod5')"><span class="qopt-letter">C</span>correct-horse-battery-staple-17 (30 characters, passphrase)</button>
+            <button class="qopt" onclick="answer(this,'q5-2',false,'mod5')"><span class="qopt-letter">D</span>X9!mK@2qL (9 characters, all types)</button>
+          </div>
+          <div class="quiz-fb c" id="q5-2-c">✓ Correct. Length is the primary driver of password strength. A 30-character passphrase has exponentially more combinations than any short complex password.</div>
+          <div class="quiz-fb w" id="q5-2-w">Length beats complexity. Modern cracking tools handle complexity well — length is the primary defense.</div>
+        </div>
+        <div class="quiz-item" id="q5-3">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">A colleague asks for your password to access a shared project file while you're out sick. What's the right response?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q5-3',false,'mod5')"><span class="qopt-letter">A</span>Give it — it's a trusted colleague and a legitimate need.</button>
+            <button class="qopt" onclick="answer(this,'q5-3',false,'mod5')"><span class="qopt-letter">B</span>Give it and change it when you return.</button>
+            <button class="qopt" onclick="answer(this,'q5-3',true,'mod5')"><span class="qopt-letter">C</span>Decline — credentials are never shared. IT should grant the colleague their own access to the resource.</button>
+            <button class="qopt" onclick="answer(this,'q5-3',false,'mod5')"><span class="qopt-letter">D</span>Give it via a secure messaging app rather than email.</button>
+          </div>
+          <div class="quiz-fb c" id="q5-3-c">✓ Correct. Credentials are personal and must never be shared. IT can provision access directly — you also protect your colleague from blame for any actions taken under your account.</div>
+          <div class="quiz-fb w" id="q5-3-w">Credential sharing is prohibited without exception. Any actions taken under your credentials are attributed to you — including actions your colleague takes.</div>
+        </div>
+        <div class="quiz-score-bar" id="score-mod5"><span class="score-dots" id="dots-mod5"></span><span id="scoretext-mod5">—</span></div>
+        <button class="btn-continue" id="mod5-btn" disabled onclick="completeMod('mod5','mod6')">Continue to Module 6 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 6 -->
+  <div class="module locked" id="mod6">
+    <div class="mod-header" onclick="toggleMod('mod6')">
+      <div class="mod-num">06</div>
+      <div class="mod-meta"><div class="mod-title">Acceptable use & device security</div><div class="mod-sub">// Your device is an attack surface</div></div>
+      <span class="mod-badge badge-locked">Locked</span>
+    </div>
+    <div class="mod-body">
+      <h3>The device in your hands is a gateway to your entire organization.</h3>
+      <ul>
+        <li><strong>No unauthorized software.</strong></li>
+        <li><strong>No circumventing security controls</strong> — antivirus, EDR, VPN, screen lock, encryption.</li>
+        <li><strong>No personal email for business</strong> — no DLP, no encryption enforcement, no audit logging.</li>
+        <li><strong>Accept patches promptly</strong> — deferral leaves known exploitable flaws in place.</li>
+        <li><strong>Screen lock within 15 minutes.</strong></li>
+        <li><strong>No auto-forwarding to personal email</strong> — a common data exfiltration vector.</li>
+        <li><strong>Encrypt portable storage</strong> — lost unencrypted media is a reportable breach event.</li>
+      </ul>
+      <div class="quiz">
+        <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Knowledge Check</span><span class="quiz-header-count" id="qcount-mod6">0 / 3 answered</span></div>
+        <div class="quiz-item" id="q6-1">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">Your laptop keeps prompting you to restart for a security update. It's been prompting for 3 days. What should you do?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q6-1',false,'mod6')"><span class="qopt-letter">A</span>Keep dismissing it until you have a slower period.</button>
+            <button class="qopt" onclick="answer(this,'q6-1',true,'mod6')"><span class="qopt-letter">B</span>Install the update at the next available opportunity — within the same day.</button>
+            <button class="qopt" onclick="answer(this,'q6-1',false,'mod6')"><span class="qopt-letter">C</span>Ask IT if the update is really necessary before installing.</button>
+            <button class="qopt" onclick="answer(this,'q6-1',false,'mod6')"><span class="qopt-letter">D</span>Disable the update notification.</button>
+          </div>
+          <div class="quiz-fb c" id="q6-1-c">✓ Correct. Security patches should be applied promptly. The window between public vulnerability disclosure and active exploitation can be measured in hours.</div>
+          <div class="quiz-fb w" id="q6-1-w">Deferring security updates leaves known vulnerabilities open. Attackers scan for unpatched versions immediately after disclosure. Apply patches promptly.</div>
+        </div>
+        <div class="quiz-item" id="q6-2">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">You're at a coffee shop and step away from your laptop for 45 seconds. Should you lock your screen?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q6-2',false,'mod6')"><span class="qopt-letter">A</span>No — 45 seconds is too short for anything to happen.</button>
+            <button class="qopt" onclick="answer(this,'q6-2',false,'mod6')"><span class="qopt-letter">B</span>Only if you have sensitive documents open.</button>
+            <button class="qopt" onclick="answer(this,'q6-2',true,'mod6')"><span class="qopt-letter">C</span>Yes — always lock your screen when stepping away, regardless of duration.</button>
+            <button class="qopt" onclick="answer(this,'q6-2',false,'mod6')"><span class="qopt-letter">D</span>Put it in sleep mode instead.</button>
+          </div>
+          <div class="quiz-fb c" id="q6-2-c">✓ Correct. Physical access attacks can be executed in under 30 seconds. Lock your screen every time — unconditionally.</div>
+          <div class="quiz-fb w" id="q6-2-w">Physical access attacks are fast. Plugging in a prepared USB, copying files, or reading visible content takes seconds. The screen lock habit should be unconditional.</div>
+        </div>
+        <div class="quiz-item" id="q6-3">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">A colleague auto-forwards all their work email to personal Gmail "for convenience." Why is this a security concern?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q6-3',false,'mod6')"><span class="qopt-letter">A</span>It's not — Gmail is a reputable service.</button>
+            <button class="qopt" onclick="answer(this,'q6-3',true,'mod6')"><span class="qopt-letter">B</span>Business data is now in an uncontrolled external system with no DLP, encryption enforcement, audit logging, or ability to remotely wipe.</button>
+            <button class="qopt" onclick="answer(this,'q6-3',false,'mod6')"><span class="qopt-letter">C</span>Only a concern if confidential emails are forwarded.</button>
+            <button class="qopt" onclick="answer(this,'q6-3',false,'mod6')"><span class="qopt-letter">D</span>Minor — they're the same person reading the email.</button>
+          </div>
+          <div class="quiz-fb c" id="q6-3-c">✓ Correct. Auto-forwarding removes corporate data from systems the organization controls. The organization cannot protect, audit, or recover data in a personal account.</div>
+          <div class="quiz-fb w" id="q6-3-w">The moment corporate data lands in a personal account, the organization loses all visibility, control, and ability to protect or recover it.</div>
+        </div>
+        <div class="quiz-score-bar" id="score-mod6"><span class="score-dots" id="dots-mod6"></span><span id="scoretext-mod6">—</span></div>
+        <button class="btn-continue" id="mod6-btn" disabled onclick="completeMod('mod6','mod7')">Continue to Module 7 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 7 -->
+  <div class="module locked" id="mod7">
+    <div class="mod-header" onclick="toggleMod('mod7')">
+      <div class="mod-num">07</div>
+      <div class="mod-meta"><div class="mod-title">Incident response — your role</div><div class="mod-sub">// What to do when something goes wrong</div></div>
+      <span class="mod-badge badge-locked">Locked</span>
+    </div>
+    <div class="mod-body">
+      <h3>Your first action determines whether a bad event becomes a catastrophic one.</h3>
+      <ul>
+        <li><strong>Report immediately</strong> — every hour of delay is an hour the attacker has to expand access or exfiltrate data.</li>
+        <li><strong>Do not investigate independently</strong> — unless directed by the security team. Independent action can destroy forensic evidence.</li>
+        <li><strong>Do not patch or modify the affected asset</strong> — preserve the state for forensic analysis.</li>
+        <li><strong>Do not discuss outside secure channels</strong> — attackers who've breached email may be monitoring.</li>
+        <li><strong>All suspected incidents are reportable</strong> — false alarms cost nothing. Missed incidents are expensive.</li>
+      </ul>
+      <p><strong>Regulatory timelines:</strong> Some incidents trigger mandatory external reporting — GDPR's 72-hour window, state breach notification laws. The clock starts when the organization becomes aware, not when the security team is notified.</p>
+      <div class="quiz">
+        <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Knowledge Check</span><span class="quiz-header-count" id="qcount-mod7">0 / 3 answered</span></div>
+        <div class="quiz-item" id="q7-1">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">You clicked a phishing link and were taken to a suspicious page. You didn't enter any credentials. What should you do?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q7-1',false,'mod7')"><span class="qopt-letter">A</span>Nothing — you didn't enter any credentials so there's no risk.</button>
+            <button class="qopt" onclick="answer(this,'q7-1',false,'mod7')"><span class="qopt-letter">B</span>Run a virus scan and if it comes back clean, move on.</button>
+            <button class="qopt" onclick="answer(this,'q7-1',true,'mod7')"><span class="qopt-letter">C</span>Report to your security team immediately — the click alone may have triggered a drive-by download or exploit.</button>
+            <button class="qopt" onclick="answer(this,'q7-1',false,'mod7')"><span class="qopt-letter">D</span>Delete the email and clear your browser cache.</button>
+          </div>
+          <div class="quiz-fb c" id="q7-1-c">✓ Correct. Clicking alone can trigger drive-by downloads, browser exploits, or tracking pixels. Report it and let the security team assess whether the system was compromised.</div>
+          <div class="quiz-fb w" id="q7-1-w">Some attacks exploit browser vulnerabilities on page load. Report it immediately — and preserve the email for forensic analysis.</div>
+        </div>
+        <div class="quiz-item" id="q7-2">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">You discover a breach and find the vulnerability that caused it. Should you patch it before the security team arrives?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q7-2',false,'mod7')"><span class="qopt-letter">A</span>Yes — patching immediately limits the damage.</button>
+            <button class="qopt" onclick="answer(this,'q7-2',false,'mod7')"><span class="qopt-letter">B</span>Yes, but document what you did first.</button>
+            <button class="qopt" onclick="answer(this,'q7-2',true,'mod7')"><span class="qopt-letter">C</span>No — wait for the security team's direction. Patching alters system state, potentially destroying forensic evidence.</button>
+            <button class="qopt" onclick="answer(this,'q7-2',false,'mod7')"><span class="qopt-letter">D</span>Only patch if the attacker appears to have active access.</button>
+          </div>
+          <div class="quiz-fb c" id="q7-2-c">✓ Correct. The security team needs to determine scope, what was accessed, and notification obligations before any system changes.</div>
+          <div class="quiz-fb w" id="q7-2-w">Well-intentioned changes during an incident can destroy evidence needed to understand scope and legal obligations. Report and wait for direction.</div>
+        </div>
+        <div class="quiz-item" id="q7-3">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">A colleague accidentally emailed 200 client names, emails, and phone numbers to the wrong external recipient. Is this reportable?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q7-3',false,'mod7')"><span class="qopt-letter">A</span>Probably not — it was an accident and the data isn't that sensitive.</button>
+            <button class="qopt" onclick="answer(this,'q7-3',false,'mod7')"><span class="qopt-letter">B</span>Only if the recipient actually reads or uses the data.</button>
+            <button class="qopt" onclick="answer(this,'q7-3',true,'mod7')"><span class="qopt-letter">C</span>Yes — this is a data exposure event involving personal information that must be reported immediately. It may trigger external notification obligations.</button>
+            <button class="qopt" onclick="answer(this,'q7-3',false,'mod7')"><span class="qopt-letter">D</span>Only report if it happens again.</button>
+          </div>
+          <div class="quiz-fb c" id="q7-3-c">✓ Correct. Any unauthorized disclosure of personal information is a reportable incident — many jurisdictions have mandatory breach notification requirements triggered by this type of exposure.</div>
+          <div class="quiz-fb w" id="q7-3-w">Accidental disclosure of personal information is a data breach event. Intent does not change the legal exposure — compliance must assess notification obligations immediately.</div>
+        </div>
+        <div class="quiz-score-bar" id="score-mod7"><span class="score-dots" id="dots-mod7"></span><span id="scoretext-mod7">—</span></div>
+        <button class="btn-continue" id="mod7-btn" disabled onclick="completeMod('mod7','mod8')">Continue to Final Module →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 8 -->
+  <div class="module locked" id="mod8">
+    <div class="mod-header" onclick="toggleMod('mod8')">
+      <div class="mod-num">08</div>
+      <div class="mod-meta"><div class="mod-title">Your personal security playbook</div><div class="mod-sub">// Habits that make you hard to phish</div></div>
+      <span class="mod-badge badge-locked">Locked</span>
+    </div>
+    <div class="mod-body">
+      <h3>Security is a habit, not an event.</h3>
+      <div class="sig-grid">
+        <div class="sig-card"><h4>🛑 Stop before acting</h4><p>When anything creates urgency around access, money, or data — treat that urgency as the red flag, not a reason to hurry.</p></div>
+        <div class="sig-card"><h4>🔍 Verify out-of-band</h4><p>For anything involving funds, credentials, or sensitive data — call a number you already have. Not from the message.</p></div>
+        <div class="sig-card"><h4>📢 Report everything suspicious</h4><p>Forward phishing emails to your security team. Report unexpected MFA prompts, strange account behavior. False alarms cost nothing.</p></div>
+        <div class="sig-card"><h4>🔒 Unique passwords + MFA everywhere</h4><p>A password manager solves reuse. MFA means one stolen password doesn't compromise an account.</p></div>
+        <div class="sig-card"><h4>🔐 Lock before leaving</h4><p>Lock your screen every time you step away — desk, coffee shop, conference room. Always.</p></div>
+        <div class="sig-card"><h4>📱 Think before you click</h4><p>Hover over links. Check the real sender domain. Ask: did I initiate this? If anything is off — navigate directly.</p></div>
+      </div>
+      <div class="quiz">
+        <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Final Knowledge Check</span><span class="quiz-header-count" id="qcount-mod8">0 / 3 answered</span></div>
+        <div class="quiz-item" id="q8-1">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">Your CEO sends an urgent Slack message asking you to purchase $3,000 in gift cards and send the codes immediately. This is unusual. What do you do?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q8-1',false,'mod8')"><span class="qopt-letter">A</span>Buy the gift cards — it's the CEO and it's Slack, not email.</button>
+            <button class="qopt" onclick="answer(this,'q8-1',false,'mod8')"><span class="qopt-letter">B</span>Reply on Slack asking for more details before purchasing.</button>
+            <button class="qopt" onclick="answer(this,'q8-1',true,'mod8')"><span class="qopt-letter">C</span>Do not purchase. Call the CEO directly on a known phone number. Slack accounts can be compromised.</button>
+            <button class="qopt" onclick="answer(this,'q8-1',false,'mod8')"><span class="qopt-letter">D</span>Buy them but don't send the codes until you see her in person.</button>
+          </div>
+          <div class="quiz-fb c" id="q8-1-c">✓ Correct. Gift card scams work across every platform — Slack, Teams, text. Out-of-band voice verification is the only reliable check for financial requests.</div>
+          <div class="quiz-fb w" id="q8-1-w">This is one of the most successful social engineering patterns. Slack accounts are compromised regularly. Out-of-band voice verification is the only reliable check.</div>
+        </div>
+        <div class="quiz-item" id="q8-2">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">What is the most important thing to do immediately after suspecting your credentials have been compromised?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q8-2',false,'mod8')"><span class="qopt-letter">A</span>Wait to see if anything suspicious happens.</button>
+            <button class="qopt" onclick="answer(this,'q8-2',false,'mod8')"><span class="qopt-letter">B</span>Change your password on the suspected service and move on.</button>
+            <button class="qopt" onclick="answer(this,'q8-2',true,'mod8')"><span class="qopt-letter">C</span>Report to your security team AND change your password — security needs to assess what may have occurred before the change.</button>
+            <button class="qopt" onclick="answer(this,'q8-2',false,'mod8')"><span class="qopt-letter">D</span>Enable MFA if you haven't already.</button>
+          </div>
+          <div class="quiz-fb c" id="q8-2-c">✓ Correct. Both actions are necessary. The security team needs to investigate what the attacker may have accessed during the window of compromise.</div>
+          <div class="quiz-fb w" id="q8-2-w">Changing the password stops the bleeding — but doesn't tell you how much damage was done. The security team needs to analyze login history and data access logs.</div>
+        </div>
+        <div class="quiz-item" id="q8-3">
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">Which single habit provides the highest return on your security investment?</div></div>
+          <div class="quiz-answers-label">Select one answer</div>
+          <div class="quiz-opts">
+            <button class="qopt" onclick="answer(this,'q8-3',false,'mod8')"><span class="qopt-letter">A</span>Using a VPN at all times.</button>
+            <button class="qopt" onclick="answer(this,'q8-3',false,'mod8')"><span class="qopt-letter">B</span>Changing your password every 30 days.</button>
+            <button class="qopt" onclick="answer(this,'q8-3',true,'mod8')"><span class="qopt-letter">C</span>Creating a pause between receiving a message and taking action — especially when urgency or authority is involved.</button>
+            <button class="qopt" onclick="answer(this,'q8-3',false,'mod8')"><span class="qopt-letter">D</span>Only opening emails from known senders.</button>
+          </div>
+          <div class="quiz-fb c" id="q8-3-c">✓ Correct. The pause habit intercepts almost every social engineering attack — phishing, BEC, vishing, and smishing all rely on the target acting before thinking.</div>
+          <div class="quiz-fb w" id="q8-3-w">The pause is the master habit. It applies to every attack type and every channel — creating friction between the trigger and your action is the single most effective personal security control.</div>
+        </div>
+        <div class="quiz-score-bar" id="score-mod8"><span class="score-dots" id="dots-mod8"></span><span id="scoretext-mod8">—</span></div>
+        <button class="btn-continue" id="mod8-btn" disabled onclick="finishTrack()">Complete General Track →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETION CARD -->
+  <div class="completion" id="completionCard">
+    <div style="font-size:52px;margin-bottom:16px;">🛡️</div>
+    <div class="cert-pill">General Awareness Track — Complete</div>
+    <h2>Training Complete.</h2>
+    <p>You've completed all 8 modules of the Aegis Security Awareness Training. Your certificate is below.</p>
+
+    <div class="cert-card" id="certDisplay">
+      <div class="cert-header">
+        <div class="cert-brand">CyberShield Technologies<strong>Aegis Security Awareness</strong></div>
+        <div class="cert-shield">🛡️</div>
+      </div>
+      <div class="cert-divider"></div>
+      <div class="cert-label">Certificate of Completion</div>
+      <div class="cert-name" id="certName">—</div>
+      <div class="cert-detail">Has successfully completed <strong>General Security Awareness Training</strong></div>
+      <div class="cert-detail">Role: <strong id="certRole">—</strong></div>
+      <div class="cert-detail">Score: <strong id="certScore">—</strong></div>
+      <div class="cert-footer">
+        <div class="cert-sig">Chris Trudeau, CISSP · ISSAP<span>Principal Security Advisor, CyberShield Technologies</span></div>
+        <div class="cert-date" id="certDate">—</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-dl" onclick="downloadCert()">⬇ Download Certificate (PDF)</button>
+      <div id="techContinueBtn" style="display:none;">
+        <a href="/training/technical" class="btn-tech">Continue to Technical Track ⚙️</a>
+      </div>
+      <a href="https://cybershield-llc.com" class="btn-outline">← cybershield-llc.com</a>
+    </div>
+
+    <p style="margin-top:20px;font-size:13px;color:var(--text-muted);">Check your inbox — the simulated phishing email is waiting. Apply what you've learned.</p>
+  </div>
+
+</div><!-- /modules -->
+
+<!-- HIDDEN PRINT PAGE FOR PDF -->
+<div id="certPrintPage" style="display:none;background:#fff;color:#000;font-family:Georgia,serif;padding:60px;position:fixed;inset:0;z-index:9999;">
+  <div style="border:2px solid #0a1f3d;border-radius:8px;padding:48px;max-width:700px;margin:0 auto;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#3b9eff,#00d4a0);"></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;">
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.12em;color:#666;text-transform:uppercase;">CyberShield Technologies</div>
+        <div style="font-size:22px;font-weight:700;color:#0a1f3d;margin-top:4px;">Aegis Security Awareness</div>
+      </div>
+      <div style="font-size:36px;">🛡️</div>
+    </div>
+    <div style="border-top:1px solid #ddd;margin:16px 0;"></div>
+    <div style="font-size:11px;letter-spacing:0.12em;color:#888;text-transform:uppercase;margin-bottom:8px;">Certificate of Completion</div>
+    <div style="font-size:28px;font-style:italic;color:#0a1f3d;margin-bottom:12px;" id="printCertName">—</div>
+    <div style="font-size:14px;color:#444;margin-bottom:6px;">Has successfully completed <strong>General Security Awareness Training</strong></div>
+    <div style="font-size:13px;color:#666;margin-bottom:4px;">Role: <strong id="printCertRole">—</strong></div>
+    <div style="font-size:13px;color:#666;margin-bottom:4px;">Score: <strong id="printCertScore">—</strong></div>
+    <div style="border-top:1px solid #ddd;margin:20px 0;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <div style="font-size:16px;font-style:italic;color:#0a1f3d;">Chris Trudeau, CISSP · ISSAP</div>
+        <div style="font-size:10px;color:#888;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;">Principal Security Advisor, CyberShield Technologies</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px;color:#888;" id="printCertDate">—</div>
+        <div style="font-size:9px;color:#bbb;margin-top:2px;font-family:monospace;" id="printCertId">—</div>
+      </div>
+    </div>
+    <div style="position:absolute;bottom:-20px;right:-10px;font-size:80px;color:rgba(0,212,160,0.05);font-family:Georgia,serif;pointer-events:none;">AEGIS</div>
+  </div>
+</div>
+
+<script>
+var token = sessionStorage.getItem('aegis_token');
+var uName = sessionStorage.getItem('aegis_name') || '';
+var uOrg  = sessionStorage.getItem('aegis_org')  || '';
+var role  = sessionStorage.getItem('aegis_role') || 'operations';
+
+// Token required for certificate issuance only - quiz works without it
+
+var ROLE_LABELS = {
+  executive:'Executive', finance:'Finance', hr:'HR / People Ops',
+  legal:'Legal', it:'IT & Security', operations:'Operations',
+  developer:'Developer', devsecops:'DevSecOps'
+};
+document.getElementById('navRole').textContent = ROLE_LABELS[role] || role;
+
+// Role callouts - HTML ids: callout-modN-rolename
+document.querySelectorAll('[id^="callout-"]').forEach(function(el) {
+  if (el.id.endsWith('-' + role)) el.classList.add('show');
+});
+document.querySelectorAll('.mod-body').forEach(function(body) {
+  var cs = body.querySelectorAll('[id^="callout-"]');
+  var shown = Array.from(cs).filter(function(c){ return c.classList.contains('show'); });
+  if (cs.length > 0 && shown.length === 0) cs[0].classList.add('show');
+});
+
+// Progress bar - HTML ids: progressText, progressFill
+var TOTAL_MODS = 8;
+var doneMods = [];
+function updateProgress() {
+  var n = doneMods.length;
+  document.getElementById('progressText').textContent = n + ' of ' + TOTAL_MODS + ' complete';
+  document.getElementById('progressFill').style.width = (n / TOTAL_MODS * 100) + '%';
+}
+
+// HTML: onclick="toggleMod('mod1')"
+function toggleMod(id) {
+  var el = document.getElementById(id);
+  if (!el || el.classList.contains('locked')) return;
+  el.classList.toggle('open');
+}
+
+var answered = {};
+var MOD_Q_COUNT = { mod1:3, mod2:4, mod3:3, mod4:3, mod5:3, mod6:3, mod7:3, mod8:3 };
+
+// HTML: onclick="answer(this,'q1-1',true,'mod1')"
+// Selectors: .quiz-opts, .qopt
+// IDs: qcount-modN, score-modN, dots-modN, scoretext-modN, modN-btn
+function answer(btn, qId, correct, modId) {
+  if (answered[qId]) return;
+  answered[qId] = { correct: correct };
+
+  var opts = btn.closest('.quiz-opts');
+  if (opts) {
+    Array.from(opts.querySelectorAll('.qopt')).forEach(function(o) { o.disabled = true; });
+  }
+  btn.classList.add(correct ? 'correct' : 'wrong');
+
+  var fb = document.getElementById(qId + (correct ? '-c' : '-w'));
+  if (fb) fb.classList.add('show');
+
+  var mod = document.getElementById(modId);
+  if (!mod) return;
+  var items = mod.querySelectorAll('.quiz-item');
+  var nAnswered = 0;
+  Array.from(items).forEach(function(item) { if (answered[item.id]) nAnswered++; });
+
+  var counter = document.getElementById('qcount-' + modId);
+  if (counter) counter.textContent = nAnswered + ' / ' + MOD_Q_COUNT[modId] + ' answered';
+
+  if (nAnswered === items.length) {
+    var nCorrect = 0;
+    Array.from(items).forEach(function(item) {
+      if (answered[item.id] && answered[item.id].correct) nCorrect++;
+    });
+
+    var scoreBar = document.getElementById('score-' + modId);
+    if (scoreBar) scoreBar.classList.add('show');
+
+    var dotsEl = document.getElementById('dots-' + modId);
+    if (dotsEl) {
+      dotsEl.innerHTML = Array.from(items).map(function(item) {
+        return '<span class="score-dot ' + (answered[item.id] && answered[item.id].correct ? 'hit' : 'miss') + '"></span>';
+      }).join('');
+    }
+
+    var scoreText = document.getElementById('scoretext-' + modId);
+    if (scoreText) scoreText.textContent = nCorrect + ' of ' + items.length + ' correct';
+
+    var continueBtn = document.getElementById(modId + '-btn');
+    if (continueBtn) continueBtn.disabled = false;
+  }
+}
+
+// HTML: onclick="completeMod('mod1','mod2')"
+function completeMod(curId, nextId) {
+  if (doneMods.indexOf(curId) === -1) doneMods.push(curId);
+  updateProgress();
+
+  var cur = document.getElementById(curId);
+  if (cur) {
+    cur.classList.remove('active', 'open');
+    cur.classList.add('completed');
+    var badge = cur.querySelector('.mod-badge');
+    if (badge) { badge.className = 'mod-badge badge-done'; badge.textContent = 'Complete ✓'; }
+  }
+
+  if (nextId) {
+    var nx = document.getElementById(nextId);
+    if (nx) {
+      nx.classList.remove('locked');
+      nx.classList.add('active');
+      nx.style.opacity = '';
+      nx.style.pointerEvents = '';
+      var nb = nx.querySelector('.mod-badge');
+      if (nb) { nb.className = 'mod-badge badge-active'; nb.textContent = 'In progress'; }
+      setTimeout(function() { nx.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+    }
+  }
+}
+
+// HTML: onclick="finishTrack()"
+function finishTrack() {
+  if (doneMods.indexOf('mod8') === -1) doneMods.push('mod8');
+  updateProgress();
+
+  var mod8 = document.getElementById('mod8');
+  if (mod8) {
+    mod8.classList.remove('active', 'open');
+    mod8.classList.add('completed');
+    var b = mod8.querySelector('.mod-badge');
+    if (b) { b.className = 'mod-badge badge-done'; b.textContent = 'Complete ✓'; }
+  }
+
+  var totalCorrect = 0, totalQ = 0;
+  document.querySelectorAll('.quiz-item').forEach(function(item) {
+    totalQ++;
+    if (answered[item.id] && answered[item.id].correct) totalCorrect++;
+  });
+
+  var card = document.getElementById('completionCard');
+  if (card) {
+    card.style.display = 'block';
+    setTimeout(function() { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+  }
+
+  var dateStr = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  fetch('/api/complete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: token, track: 'general', score: totalCorrect, totalQ: totalQ })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!data.success) throw new Error(data.error || 'API error');
+    sessionStorage.setItem('aegis_general_complete', 'true');
+    sessionStorage.setItem('aegis_cert_id',   data.certId);
+    sessionStorage.setItem('aegis_cert_url',  data.certUrl);
+    sessionStorage.setItem('p_name',   data.name);
+    sessionStorage.setItem('p_org',    data.org || uOrg || '—');
+    sessionStorage.setItem('p_role',   ROLE_LABELS[role] || role);
+    sessionStorage.setItem('p_score',  data.score + '/' + data.totalQ + ' (' + data.pct + '%)');
+    sessionStorage.setItem('p_date',   dateStr);
+    sessionStorage.setItem('p_id',     data.certId);
+    sessionStorage.setItem('p_verify', data.certUrl);
+
+    function setEl(id, val) { var e = document.getElementById(id); if (e) e.textContent = val; }
+    setEl('certName',  data.name);
+    setEl('certRole',  ROLE_LABELS[role] || role);
+    setEl('certScore', data.score + '/' + data.totalQ + ' (' + data.pct + '%)');
+    setEl('certDate',  dateStr);
+
+    if (role === 'developer' || role === 'devsecops') {
+      var tb = document.getElementById('techContinueBtn');
+      if (tb) tb.style.display = 'block';
+    }
+  })
+  .catch(function(e) {
+    console.error('[finishTrack]', e.message);
+    var el = document.getElementById('certName');
+    if (el) el.textContent = uName || 'Participant';
+  });
+}
+
+// HTML: onclick="downloadCert()"
+function downloadCert() {
+  function get(key, fb) { return sessionStorage.getItem(key) || fb || '—'; }
+  function setEl(id, val) { var e = document.getElementById(id); if (e) e.textContent = val; }
+  setEl('printCertName',  get('p_name', uName));
+  setEl('printCertRole',  get('p_role', ROLE_LABELS[role]));
+  setEl('printCertScore', get('p_score'));
+  setEl('printCertDate',  get('p_date'));
+  setEl('printCertId',    get('p_id'));
+
+  var pg = document.getElementById('certPrintPage');
+  if (!pg) return;
+  pg.style.display = 'block';
+  setTimeout(function() {
+    window.print();
+    setTimeout(function() { pg.style.display = 'none'; }, 600);
+  }, 150);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You Were Phished — Aegis Security Awareness | CyberShield</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #07111f; --bg-2: #0d1e33; --border: rgba(59,158,255,0.15);
+      --blue: #3b9eff; --teal: #00d4a0; --text: #e8f0f8; --text-muted: #7a9ab8;
+      --danger: #ef4444;
+      --font-serif: 'DM Serif Display', Georgia, serif;
+      --font-sans: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--font-sans); min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 40px 20px;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(59,158,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(59,158,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none; z-index: 0;
+    }
+    .container {
+      position: relative; z-index: 1;
+      max-width: 680px; width: 100%;
+    }
+    .alert-banner {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.4);
+      border-radius: 10px;
+      padding: 24px 28px;
+      margin-bottom: 32px;
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .alert-icon { font-size: 32px; flex-shrink: 0; }
+    .alert-content h2 {
+      font-family: var(--font-serif); font-size: 24px;
+      color: #fca5a5; margin-bottom: 8px;
+    }
+    .alert-content p {
+      font-size: 14px; color: #fca5a5; line-height: 1.6; opacity: 0.85;
+    }
+    .card {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 32px; margin-bottom: 24px;
+    }
+    .card h3 {
+      font-family: var(--font-serif); font-size: 20px;
+      margin-bottom: 20px; color: var(--text);
+    }
+    .clue-list { display: flex; flex-direction: column; gap: 14px; }
+    .clue {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 14px 16px;
+      background: rgba(59,158,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .clue-num {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--blue); background: rgba(59,158,255,0.1);
+      border-radius: 4px; padding: 2px 7px;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .clue-text h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .clue-text p { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+    .safe-note {
+      background: rgba(0,212,160,0.08);
+      border: 1px solid rgba(0,212,160,0.2);
+      border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .safe-note-icon { font-size: 22px; flex-shrink: 0; }
+    .safe-note p { font-size: 14px; color: #6ee7c7; line-height: 1.6; }
+    .safe-note strong { color: var(--teal); }
+    .next-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .next-step {
+      padding: 16px; background: rgba(59,158,255,0.05);
+      border: 1px solid var(--border); border-radius: 8px;
+    }
+    .next-step h4 { font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--blue); }
+    .next-step p { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+    .brand {
+      text-align: center; margin-top: 8px;
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-muted); letter-spacing: 0.08em;
+    }
+    .brand a { color: var(--blue); text-decoration: none; }
+    .brand a:hover { text-decoration: underline; }
+    @media (max-width: 520px) {
+      .next-steps { grid-template-columns: 1fr; }
+      .alert-banner { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="alert-banner">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-content">
+        <h2>This was a simulated phishing attack.</h2>
+        <p>You clicked on a phishing link and submitted your credentials to a fake login page. In a real attack, your account would now be compromised. <strong>No actual credentials were captured</strong> — this is a CyberShield security training exercise.</p>
+      </div>
+    </div>
+
+    <div class="safe-note">
+      <div class="safe-note-icon">🔒</div>
+      <p><strong>Your information is safe.</strong> The fake login page was designed to intercept the form before any data was transmitted. No username, password, or personal data was recorded, stored, or transmitted anywhere. This simulation is governed by strict ethical constraints.</p>
+    </div>
+
+    <div class="card">
+      <h3>Here's what you missed — the attack's tell-tale signs</h3>
+      <div class="clue-list">
+        <div class="clue">
+          <div class="clue-num">01</div>
+          <div class="clue-text">
+            <h4>Sender domain mismatch</h4>
+            <p>The email came from <code style="font-family:var(--font-mono);font-size:12px;color:var(--blue);">security-noreply@cybershield-llc.com</code> — not from Google or Microsoft. Legitimate security alerts always come from the actual company's domain.</p>
+          </div>
+        </div>
+        <div class="clue">
+          <div class="clue-num">02</div>
+          <div class="clue-text">
+            <h4>Artificial urgency</h4>
+            <p>"Verify within 24 hours" and "unusual activity detected" are classic social engineering pressure tactics. Urgency overrides your critical thinking. Real providers rarely threaten immediate account lockout.</p>
+          </div>
+        </div>
+        <div class="clue">
+          <div class="clue-num">03</div>
+          <div class="clue-text">
+            <h4>URL didn't match the platform</h4>
+            <p>The login page URL was <code style="font-family:var(--font-mono);font-size:12px;color:var(--blue);">aegis.cybershield-llc.com/sim/...</code> — not accounts.google.com or login.microsoftonline.com. Always check the address bar before entering credentials.</p>
+          </div>
+        </div>
+        <div class="clue">
+          <div class="clue-num">04</div>
+          <div class="clue-text">
+            <h4>No MFA prompt</h4>
+            <p>Real logins from Microsoft and Google trigger multi-factor authentication. If an "account verification" page accepts your password without sending a code to your phone, it's likely a phishing page.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>What to do when you see the real thing</h3>
+      <div class="next-steps">
+        <div class="next-step">
+          <h4>🚫 Don't click</h4>
+          <p>When an email creates urgency around account access, go directly to the site by typing the URL — never click the link in the email.</p>
+        </div>
+        <div class="next-step">
+          <h4>🔍 Check the sender</h4>
+          <p>Hover over the From address. The display name can say anything — the actual sending domain is what matters.</p>
+        </div>
+        <div class="next-step">
+          <h4>🔒 Verify the URL</h4>
+          <p>Before entering any credentials, confirm the URL is the exact domain you expect. Typosquatting is common: microsofft.com, g00gle.com.</p>
+        </div>
+        <div class="next-step">
+          <h4>📢 Report it</h4>
+          <p>Forward suspicious emails to your IT or security team. Even if you're unsure, report it — false positives are far cheaper than breaches.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="brand">
+      <a href="https://aegis.cybershield-llc.com">Aegis</a> · Security Awareness Training ·
+      <a href="https://cybershield-llc.com">CyberShield Technologies</a>
+    </div>
+
+  </div>
+</body>
+</html>

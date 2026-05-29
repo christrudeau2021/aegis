@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Workspace — Sign in</title>
+<!--
+  PHISHING SIMULATION — GOOGLE WORKSPACE TEMPLATE
+  Slightly different from personal Gmail — references "your organization"
+  // FUTURE: Inject actual org name from KV record
+-->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Google Sans',Arial,sans-serif;background:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.card{width:450px;border:1px solid #dadce0;border-radius:8px;padding:48px 40px 36px;box-shadow:0 2px 10px rgba(60,64,67,.15);}
+.ws-header{display:flex;align-items:center;gap:10px;margin-bottom:32px;}
+.ws-logo-text{font-size:18px;color:#4285F4;font-weight:400;}
+.ws-logo-sub{font-size:12px;color:#5f6368;}
+h1{font-size:24px;font-weight:400;color:#202124;margin-bottom:8px;}
+.sub{font-size:14px;color:#5f6368;margin-bottom:24px;line-height:1.5;}
+.chip{display:inline-flex;align-items:center;gap:10px;border:1px solid #dadce0;border-radius:24px;padding:8px 16px 8px 8px;margin-bottom:32px;}
+.avatar{width:32px;height:32px;background:linear-gradient(135deg,#1a73e8,#00897b);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600;}
+.chip-email{font-size:14px;color:#202124;}
+.input-wrap{position:relative;margin-bottom:32px;}
+.input-wrap input{width:100%;border:1px solid #dadce0;border-radius:4px;padding:16px 14px 4px;font-size:16px;color:#202124;outline:none;transition:border-color .15s;background:#fff;font-family:'Google Sans',Arial,sans-serif;}
+.input-wrap input:focus{border-color:#1a73e8;box-shadow:0 0 0 1px #1a73e8;}
+.input-wrap label{position:absolute;top:50%;left:14px;transform:translateY(-50%);font-size:16px;color:#5f6368;pointer-events:none;transition:all .15s;}
+.input-wrap input:focus~label,.input-wrap input:not(:placeholder-shown)~label{top:8px;transform:none;font-size:12px;color:#1a73e8;}
+.btn-row{display:flex;align-items:center;justify-content:space-between;}
+.btn-ghost{font-size:14px;font-weight:500;color:#1a73e8;padding:9px 12px;border-radius:4px;background:none;border:none;cursor:pointer;font-family:'Google Sans',Arial,sans-serif;}
+.btn-ghost:hover{background:rgba(26,115,232,.06);}
+.btn-blue{font-size:14px;font-weight:500;color:#fff;padding:9px 24px;border-radius:4px;background:#1a73e8;border:none;cursor:pointer;font-family:'Google Sans',Arial,sans-serif;}
+.btn-blue:hover{background:#1765cc;}
+.footer{margin-top:28px;padding-top:16px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;}
+.footer-links{display:flex;gap:20px;}
+.footer-links a{font-size:12px;color:#5f6368;text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="ws-header">
+    <svg width="32" height="32" viewBox="0 0 32 32"><text x="0" y="26" font-family="Arial" font-size="28" font-weight="700" fill="#4285F4">G</text></svg>
+    <div>
+      <div class="ws-logo-text">Google Workspace</div>
+      <div class="ws-logo-sub">Managed by your organization</div>
+    </div>
+  </div>
+  <h1>Verify your account</h1>
+  <p class="sub">Your organization requires you to re-authenticate to continue accessing Google Workspace services.</p>
+  <div class="chip">
+    <div class="avatar" id="ws-avatar">?</div>
+    <span class="chip-email" id="ws-email">Loading...</span>
+  </div>
+  <form id="phish-form" onsubmit="handleSubmit(event)">
+    <input type="hidden" id="token-field" value="__TOKEN__">
+    <input type="hidden" id="email-field" value="__EMAIL__">
+    <div class="input-wrap">
+      <input type="password" id="pw-field" placeholder=" " autocomplete="current-password">
+      <label>Enter your password</label>
+    </div>
+    <div class="btn-row">
+      <button type="button" class="btn-ghost">Forgot password?</button>
+      <button type="submit" class="btn-blue">Next</button>
+    </div>
+  </form>
+  <div class="footer">
+    <span></span>
+    <div class="footer-links">
+      <a href="#">Help</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+  </div>
+</div>
+<script>
+const email = document.getElementById('email-field').value || 'user@workspace.com';
+document.getElementById('ws-email').textContent = email;
+document.getElementById('ws-avatar').textContent = email.charAt(0).toUpperCase();
+async function handleSubmit(e) {
+  e.preventDefault();
+  // SECURITY: Password NOT read or transmitted — by design
+  const token = document.getElementById('token-field').value;
+  try {
+    await fetch('/api/sim-capture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, email_entered: email }),
+    });
+  } catch {}
+  window.location.href = '/phished';
+}
+</script>
+</body>
+</html>
