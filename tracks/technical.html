@@ -205,559 +205,273 @@
 
 <div class="modules">
 
-  <!-- ═══════════════════════════════════════════════════════
-       T1 — IDENTITY IN CI/CD
-  ═══════════════════════════════════════════════════════ -->
   <div class="module active" id="tmod1">
     <div class="mod-header" onclick="toggleMod('tmod1')">
-      <div class="mod-num">T1</div>
-      <div class="mod-meta">
-        <div class="mod-title">Identity in CI/CD environments</div>
-        <div class="mod-sub">// Who — and what — is authenticating in your pipeline</div>
-      </div>
+      <div class="mod-num">01</div>
+      <div class="mod-meta"><div class="mod-title">Identity in CI/CD pipelines</div><div class="mod-sub">// Service accounts, workload identity, scoped credentials</div></div>
       <span class="mod-badge badge-active">In progress</span>
     </div>
     <div class="mod-body">
-      <h3>Your pipeline has an identity problem most teams don't think about.</h3>
-      <p>In a CI/CD environment, authentication isn't just humans logging into systems. Build agents, deployment services, container registries, testing frameworks, and infrastructure provisioning tools all authenticate to each other continuously — often using long-lived credentials stored in ways that would be unacceptable for human accounts.</p>
-      <p>The attack surface is significant: <strong>any credential used in an automated pipeline becomes a high-value target.</strong> A compromised build agent with the right service account can push malicious code to production, exfiltrate source code, or pivot into cloud infrastructure.</p>
-
-      <h4>The principle of least privilege in pipelines</h4>
-      <p>Every service account, build agent, and deployment identity should have <strong>only the permissions required for its specific function</strong> — nothing more. A service account that runs unit tests does not need write access to the container registry. A deployment agent does not need read access to the database. Scoping permissions minimizes the blast radius of a compromised identity.</p>
-
-      <h4>Human vs. machine identity — different rules</h4>
-      <table class="risk-table">
-        <thead><tr><th>Identity Type</th><th>Authentication Method</th><th>Key Controls</th><th>Common Failure</th></tr></thead>
-        <tbody>
-          <tr><td>Human developers</td><td>SSO + MFA + short-lived tokens</td><td>MFA required, session timeouts, access review</td><td>Shared accounts, no MFA on CI platform</td></tr>
-          <tr><td>Build agents</td><td>Service account + scoped token</td><td>Least privilege, token rotation, no interactive login</td><td>Over-privileged service accounts, static tokens</td></tr>
-          <tr><td>Deployment services</td><td>Workload identity / OIDC preferred</td><td>Ephemeral credentials, audit logging, env scoping</td><td>Long-lived tokens committed to config files</td></tr>
-          <tr><td>External integrations</td><td>API keys / OAuth tokens</td><td>Scoped to minimum permissions, rotated regularly</td><td>Organization-wide admin keys used for single integration</td></tr>
-        </tbody>
-      </table>
-
-      <h4>Workload identity — the modern approach</h4>
-      <p>Rather than issuing long-lived credentials to build agents, modern platforms support workload identity federation — the pipeline asserts its identity to a cloud provider using a short-lived, cryptographically verifiable token. The cloud provider validates the assertion and issues a temporary credential scoped to the specific job. <strong>No static secret is stored, no rotation is required, and every credential expires automatically.</strong></p>
-
+      <h3>Pipelines need identity. Identity needs boundaries.</h3>
+<p>CI/CD systems run with privileges that often exceed any single human user. A compromised pipeline credential can push code, deploy to production, or access secrets across every environment.</p>
+<ul>
+<li><strong>Scoped service accounts:</strong> One purpose per credential. The container-push account writes only to the container registry — it does not deploy, read secrets, or access production.</li>
+<li><strong>Workload identity federation:</strong> Replaces long-lived service account keys with short-lived tokens issued at run time. Removes the credentials that get leaked.</li>
+<li><strong>Least privilege:</strong> Pipeline permissions reviewed quarterly. Privilege creep is the primary source of CI/CD blast radius.</li>
+<li><strong>MFA for human access:</strong> Engineers logging into the CI platform require MFA, just as they do for any other privileged system.</li>
+</ul>
       <div class="quiz">
         <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Knowledge Check</span><span class="quiz-header-count" id="qcount-tmod1">0 / 4 answered</span></div>
-
+        
         <div class="quiz-item" id="qt1-1">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">A CI build agent needs to push container images to a registry. Which approach best follows the principle of least privilege?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">A CI build agent needs to push container images to a registry. Which approach best follows least privilege?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt1-1',false,'Use the lead engineer\'s credentials — they have full registry access.')"><span class="qopt-letter">A</span>Use the lead engineer's credentials — they have full registry access.</button>
-            <button class="qopt" onclick="answer(this,'qt1-1',false,'tmod1')"><span class="qopt-letter">B</span>Create a single service account with full admin access to all registries for simplicity.</button>
-            <button class="qopt" onclick="answer(this,'qt1-1',true,'tmod1')"><span class="qopt-letter">C</span>Create a dedicated service account with write access scoped only to the specific registry and repository this pipeline needs.</button>
-            <button class="qopt" onclick="answer(this,'qt1-1',false,'tmod1')"><span class="qopt-letter">D</span>Use the same service account as other build agents — consolidating service accounts is more manageable.</button>
-          </div>
-          <div class="quiz-fb c" id="qt1-1-c">✓ Correct. Least privilege means each identity gets exactly the permissions it needs — nothing inherited from convenience. Dedicated, scoped service accounts limit what an attacker can do with a compromised build agent.</div>
-          <div class="quiz-fb w" id="qt1-1-w">Each pipeline component should have its own identity with the minimum required permissions. Shared or over-privileged accounts mean a single compromised credential can affect all systems that account touches.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt1-1',false,'tmod1')"><span class="qopt-letter">A</span>Use the deployment service account that already has access to multiple systems.</button><button class="qopt" onclick="answer(this,'qt1-1',false,'tmod1')"><span class="qopt-letter">B</span>Create a single service account with full admin access to all registries.</button><button class="qopt" onclick="answer(this,'qt1-1',true,'tmod1')"><span class="qopt-letter">C</span>Create a dedicated service account with write access scoped only to the specific registry.</button><button class="qopt" onclick="answer(this,'qt1-1',false,'tmod1')"><span class="qopt-letter">D</span>Use the same service account as other build agents — consolidating service accounts simplifies management.</button></div>
+          <div class="quiz-fb c" id="qt1-1-c">✓ Correct. Each service account should be scoped to a single purpose. A push-only credential to one registry minimizes blast radius if compromised.</div>
+          <div class="quiz-fb w" id="qt1-1-w">Least privilege means one purpose, one scope. Consolidating service accounts increases blast radius — when one is compromised, everything it can do is compromised.</div>
         </div>
-
         <div class="quiz-item" id="qt1-2">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 4</div><div class="quiz-q-text">What is the primary security advantage of workload identity federation over static service account credentials?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">What is the primary security advantage of workload identity federation over static service account keys?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt1-2',false,'It\'s easier to configure and doesn\'t require security review.')"><span class="qopt-letter">A</span>It's easier to configure and doesn't require security review.</button>
-            <button class="qopt" onclick="answer(this,'qt1-2',true,'tmod1')"><span class="qopt-letter">B</span>Credentials are short-lived and ephemeral — there are no long-lived secrets to rotate, leak, or steal.</button>
-            <button class="qopt" onclick="answer(this,'qt1-2',false,'tmod1')"><span class="qopt-letter">C</span>It allows build agents to authenticate as human users, which provides more access.</button>
-            <button class="qopt" onclick="answer(this,'qt1-2',false,'tmod1')"><span class="qopt-letter">D</span>It bypasses the need for MFA on CI/CD service accounts.</button>
-          </div>
-          <div class="quiz-fb c" id="qt1-2-c">✓ Correct. Ephemeral credentials eliminate the entire class of "leaked long-lived token" incidents. If there is no persistent credential to steal, there is nothing to exfiltrate from logs, config files, or secrets stores. The token that existed for a specific job is gone when the job ends.</div>
-          <div class="quiz-fb w" id="qt1-2-w">The key benefit is eliminating the long-lived static credential. Short-lived, automatically-expiring credentials mean any leaked token is nearly worthless by the time it could be exploited.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt1-2',false,'tmod1')"><span class="qopt-letter">A</span>It makes deployments faster by reducing authentication overhead.</button><button class="qopt" onclick="answer(this,'qt1-2',true,'tmod1')"><span class="qopt-letter">B</span>Credentials are short-lived and ephemeral — there are no long-lived secrets that can be leaked or stolen.</button><button class="qopt" onclick="answer(this,'qt1-2',false,'tmod1')"><span class="qopt-letter">C</span>It allows build agents to authenticate as human users, which provides better audit trails.</button><button class="qopt" onclick="answer(this,'qt1-2',false,'tmod1')"><span class="qopt-letter">D</span>It bypasses the need for MFA on CI/CD service accounts.</button></div>
+          <div class="quiz-fb c" id="qt1-2-c">✓ Correct. Workload identity issues short-lived tokens at run time, eliminating the static keys that end up in repos, logs, and config files.</div>
+          <div class="quiz-fb w" id="qt1-2-w">The core benefit is eliminating long-lived credentials. Short-lived federated tokens cannot be exfiltrated and reused later — they expire within minutes.</div>
         </div>
-
         <div class="quiz-item" id="qt1-3">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 7</div><div class="quiz-q-text">A deployment pipeline service account currently has admin access to your entire cloud environment "because we weren't sure exactly what it needed." What should happen?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">A deployment pipeline service account currently has admin access to your entire cloud account. What should you do?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt1-3',false,'tmod1')"><span class="qopt-letter">A</span>Leave it — over-provisioning prevents deployment failures.</button>
-            <button class="qopt" onclick="answer(this,'qt1-3',false,'tmod1')"><span class="qopt-letter">B</span>Document it as a known risk and accept it.</button>
-            <button class="qopt" onclick="answer(this,'qt1-3',true,'Audit the pipeline\'s actual permission requirements, scope the service account to only those permissions, and treat the current state as a security finding requiring remediation.')"><span class="qopt-letter">C</span>Audit the pipeline's actual permission requirements, scope the service account to only those permissions, and treat the current state as a security finding requiring remediation.</button>
-            <button class="qopt" onclick="answer(this,'qt1-3',false,'Monitor the account\'s activity and remove admin access only if misuse is detected.')"><span class="qopt-letter">D</span>Monitor the account's activity and remove admin access only if misuse is detected.</button>
-          </div>
-          <div class="quiz-fb c" id="qt1-3-c">✓ Correct. Over-privileged service accounts are a high-severity finding. The correct response is to determine what is actually needed and scope permissions accordingly. "Monitor for misuse" is not a substitute for least-privilege access control.</div>
-          <div class="quiz-fb w" id="qt1-3-w">An over-privileged pipeline service account represents one of the highest-risk configurations in a software delivery environment. A compromised build agent with admin cloud access can provision attacker-controlled infrastructure, exfiltrate data, and cover its tracks. Remediate immediately.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt1-3',false,'tmod1')"><span class="qopt-letter">A</span>Leave it — over-provisioning prevents deployment failures.</button><button class="qopt" onclick="answer(this,'qt1-3',false,'tmod1')"><span class="qopt-letter">B</span>Document it as a known risk and accept it.</button><button class="qopt" onclick="answer(this,'qt1-3',true,'tmod1')"><span class="qopt-letter">C</span>Audit what the pipeline actually needs, scope the account down to those specific permissions, and review quarterly.</button><button class="qopt" onclick="answer(this,'qt1-3',false,'tmod1')"><span class="qopt-letter">D</span>Only act if a security incident occurs.</button></div>
+          <div class="quiz-fb c" id="qt1-3-c">✓ Correct. Over-privileged service accounts are one of the highest-risk findings in any security audit. Scope down to actual needs and review regularly.</div>
+          <div class="quiz-fb w" id="qt1-3-w">Admin-level pipeline credentials are a top compromise vector. A breached pipeline becomes a breach of every system it can touch.</div>
         </div>
-
         <div class="quiz-item" id="qt1-4">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 10</div><div class="quiz-q-text">Your CI platform supports human user authentication without MFA "for developer convenience." What risk does this introduce?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 4</div><div class="quiz-q-text">Your CI platform supports human user authentication without MFA "for developer convenience." What is the risk?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt1-4',false,'tmod1')"><span class="qopt-letter">A</span>Minimal — developers are trusted users and the CI platform is internal.</button>
-            <button class="qopt" onclick="answer(this,'qt1-4',true,'tmod1')"><span class="qopt-letter">B</span>Significant — a compromised developer credential provides access to modify pipelines, inject malicious steps, and access pipeline secrets without an MFA challenge.</button>
-            <button class="qopt" onclick="answer(this,'qt1-4',false,'tmod1')"><span class="qopt-letter">C</span>Low — attackers typically target production systems, not CI platforms.</button>
-            <button class="qopt" onclick="answer(this,'qt1-4',false,'tmod1')"><span class="qopt-letter">D</span>Acceptable — MFA on CI platforms creates too much friction for fast deployment cycles.</button>
-          </div>
-          <div class="quiz-fb c" id="qt1-4-c">✓ Correct. CI/CD platforms are extremely high-value targets precisely because they have trusted access to source code, secrets, and deployment infrastructure. A compromised CI user account without MFA protection can potentially compromise every application the platform builds and deploys.</div>
-          <div class="quiz-fb w" id="qt1-4-w">CI/CD platforms should be treated as critical infrastructure requiring MFA for all human authentication. They hold secrets, have deployment access, and can modify what code runs in production. Attackers specifically target CI systems for this reason.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt1-4',false,'tmod1')"><span class="qopt-letter">A</span>Minimal — developers are trusted users and the CI platform is internal.</button><button class="qopt" onclick="answer(this,'qt1-4',true,'tmod1')"><span class="qopt-letter">B</span>Significant — a compromised developer credential provides access to modify pipelines, deploy code, and access secrets across environments.</button><button class="qopt" onclick="answer(this,'qt1-4',false,'tmod1')"><span class="qopt-letter">C</span>Low — attackers typically target production systems, not CI platforms.</button><button class="qopt" onclick="answer(this,'qt1-4',false,'tmod1')"><span class="qopt-letter">D</span>Acceptable — MFA on CI platforms creates too much friction for fast development.</button></div>
+          <div class="quiz-fb c" id="qt1-4-c">✓ Correct. CI platforms are now a primary attack surface. A developer account without MFA on a CI system is equivalent to no MFA on production.</div>
+          <div class="quiz-fb w" id="qt1-4-w">CI platforms have access to deploy, modify pipelines, and reach secrets. They require MFA at the same level as production access.</div>
         </div>
-
         <div class="quiz-score-bar" id="score-tmod1"><span class="score-dots" id="dots-tmod1"></span><span id="scoretext-tmod1">—</span></div>
-        <button class="btn-continue" id="tmod1-btn" disabled onclick="completeMod('tmod1','tmod2')">Continue to T2 →</button>
+        <button class="btn-continue" id="tmod1-btn" disabled onclick="completeMod('tmod1','tmod2')">Continue to Module 2 →</button>
       </div>
     </div>
   </div>
-
-  <!-- ═══════════════════════════════════════════════════════
-       T2 — SECRETS & CREDENTIAL SECURITY
-  ═══════════════════════════════════════════════════════ -->
   <div class="module locked" id="tmod2">
     <div class="mod-header" onclick="toggleMod('tmod2')">
-      <div class="mod-num">T2</div>
-      <div class="mod-meta">
-        <div class="mod-title">Secrets & credential security</div>
-        <div class="mod-sub">// How credentials leak and how to stop it</div>
-      </div>
+      <div class="mod-num">02</div>
+      <div class="mod-meta"><div class="mod-title">Secrets & credentials</div><div class="mod-sub">// Storage, rotation, and exposure response</div></div>
       <span class="mod-badge badge-locked">Locked</span>
     </div>
     <div class="mod-body">
-      <h3>Credentials in code are a breach waiting to happen.</h3>
-      <p>The accidental commit of API keys, database passwords, private certificates, and access tokens to source control repositories is one of the most common and highest-impact security failures in software development. Public repositories are scanned by automated tools within seconds of a commit — but the problem is just as serious in private repositories, which can be compromised, exported, or made public by mistake.</p>
-
-      <div class="code-label bad">❌ Do not do this</div>
-      <div class="codeblock">
-        <span class="bad"># credentials hardcoded in application config</span><br>
-        <span class="bad">DATABASE_URL = "postgresql://admin:Sup3rS3cr3t!@prod-db.internal:5432/app"</span><br>
-        <span class="bad">STRIPE_SECRET_KEY = "sk_live_4xKb9mNpQ..."</span><br>
-        <span class="bad">AWS_SECRET_ACCESS_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"</span>
-      </div>
-
-      <div class="code-label good">✓ Correct approach</div>
-      <div class="codeblock">
-        <span class="good"># references to environment variables — no credentials in code</span><br>
-        <span class="neutral">DATABASE_URL = os.environ.get("DATABASE_URL")</span><br>
-        <span class="neutral">STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")</span><br>
-        <span class="neutral">AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")</span><br>
-        <br>
-        <span class="comment"># secrets are injected at runtime by the platform/vault</span><br>
-        <span class="comment"># they are never committed to source control</span>
-      </div>
-
-      <h4>Where secrets leak</h4>
-      <div class="sig-grid">
-        <div class="sig-card"><h4>Source control commits</h4><p>The most common vector. Config files, .env files, test fixtures, and migration scripts are frequent offenders. Pre-commit scanning catches this before it reaches the repo.</p></div>
-        <div class="sig-card"><h4>Build logs</h4><p>Debug output, error messages, and verbose logging during CI builds can print credential values. Build logs are often stored, shared, and broadly accessible.</p></div>
-        <div class="sig-card"><h4>Container images</h4><p>Credentials baked into Docker layers — including in build-time arguments — persist in the image and are extractable even if removed in a subsequent layer.</p></div>
-        <div class="sig-card"><h4>Environment variable sprawl</h4><p>Credentials passed as plain-text env vars to containers or serverless functions appear in process listings, deployment manifests, and cloud provider dashboards.</p></div>
-      </div>
-
-      <h4>Credential lifecycle requirements</h4>
-      <ul>
-        <li><strong>Unique per system:</strong> One credential per service, per environment. Never reuse credentials across development, staging, and production.</li>
-        <li><strong>Rotated regularly:</strong> Non-interactive authentication secrets must be rotated at a minimum annually — and immediately if there is any suspicion of compromise or if personnel with access leave the organization.</li>
-        <li><strong>Rotated within 24 hours of suspected compromise.</strong></li>
-        <li><strong>Stored in vaults or encrypted storage</strong> with access restricted to authorized systems and individuals. All access to the secrets store must be logged.</li>
-        <li><strong>Minimum required permissions:</strong> Credentials should authorize only the specific actions they're created for — a read-only database credential cannot be used to escalate privileges even if compromised.</li>
-      </ul>
-
+      <h3>Secrets in code are not secrets.</h3>
+<p>Every credential in a repo, log, or environment file is one search away from exposure. The question is not whether secrets will be exposed — it is how fast you detect and revoke them when it happens.</p>
+<ul>
+<li><strong>Never in source code:</strong> Use a secrets manager (Vault, AWS Secrets Manager, GCP Secret Manager, Doppler). Inject at runtime.</li>
+<li><strong>Rotation:</strong> Time-bound — at minimum every 90 days, immediately on any suspected exposure.</li>
+<li><strong>Environment separation:</strong> Dev, staging, and production each have their own credentials. A leaked dev credential must not grant production access.</li>
+<li><strong>Audit trails:</strong> All access to the secrets store must be logged.</li>
+<li><strong>Minimum required permissions:</strong> Credentials should authorize only the specific actions they were created for.</li>
+</ul>
       <div class="quiz">
         <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Knowledge Check</span><span class="quiz-header-count" id="qcount-tmod2">0 / 3 answered</span></div>
-
+        
         <div class="quiz-item" id="qt2-1">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 12</div><div class="quiz-q-text">A developer pushed an API key to a private GitHub repository by accident. They deleted the commit and force-pushed. Is this sufficient remediation?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">A developer pushed an API key to a private GitHub repository by accident. They deleted the commit and force-pushed. Is this sufficient remediation?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt2-1',false,'tmod2')"><span class="qopt-letter">A</span>Yes — the commit is deleted and the repo is private.</button>
-            <button class="qopt" onclick="answer(this,'qt2-1',false,'tmod2')"><span class="qopt-letter">B</span>Yes, as long as no one else pulled the repository between the push and the deletion.</button>
-            <button class="qopt" onclick="answer(this,'qt2-1',true,'tmod2')"><span class="qopt-letter">C</span>No — the credential must be revoked and rotated immediately, regardless of repository visibility or commit removal speed.</button>
-            <button class="qopt" onclick="answer(this,'qt2-1',false,'tmod2')"><span class="qopt-letter">D</span>Only if the key was committed for more than a few seconds.</button>
-          </div>
-          <div class="quiz-fb c" id="qt2-1-c">✓ Correct. Treat any exposed credential as compromised — immediately and unconditionally. Git history can be cached by other systems, pull mirrors, CI systems, and forks. Automated scanning tools may have already captured it. Revoke and rotate first; then investigate exposure scope.</div>
-          <div class="quiz-fb w" id="qt2-1-w">The only correct response to a committed credential is immediate revocation and rotation. Git commits are replicated to CI systems, cached by GitHub's own infrastructure, and scanned by automated tools within seconds. "Quickly deleted" is not a security control.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt2-1',false,'tmod2')"><span class="qopt-letter">A</span>Yes — the commit is deleted and the repo is private.</button><button class="qopt" onclick="answer(this,'qt2-1',false,'tmod2')"><span class="qopt-letter">B</span>Yes, as long as no one else pulled the repository between the push and the deletion.</button><button class="qopt" onclick="answer(this,'qt2-1',true,'tmod2')"><span class="qopt-letter">C</span>No — the credential must be revoked and rotated immediately, regardless of repository visibility or commit removal speed.</button><button class="qopt" onclick="answer(this,'qt2-1',false,'tmod2')"><span class="qopt-letter">D</span>Only if the key was committed for more than a few seconds.</button></div>
+          <div class="quiz-fb c" id="qt2-1-c">✓ Correct. Treat any exposed credential as compromised — immediately and unconditionally. Git history can be cached by mirrors, CI systems, and automated scanners.</div>
+          <div class="quiz-fb w" id="qt2-1-w">Once exposed, a credential cannot be unexposed. Automated scanners can capture a secret within seconds of a commit. Always revoke and rotate.</div>
         </div>
-
         <div class="quiz-item" id="qt2-2">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 4</div><div class="quiz-q-text">A developer wants to test a feature that requires database access. They ask to use the production database credential "just for testing." What's the correct response?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">A developer wants to test a feature that requires database access. They ask to use the production database credential "just for testing." What is the correct response?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt2-2',false,'Allow it — the developer is trusted and it\'s a one-time thing.')"><span class="qopt-letter">A</span>Allow it — the developer is trusted and it's a one-time thing.</button>
-            <button class="qopt" onclick="answer(this,'qt2-2',false,'tmod2')"><span class="qopt-letter">B</span>Allow it but require them to not save the credential locally.</button>
-            <button class="qopt" onclick="answer(this,'qt2-2',true,'tmod2')"><span class="qopt-letter">C</span>Issue a separate, scoped credential for the development/test environment. Production credentials must never be used in development environments.</button>
-            <button class="qopt" onclick="answer(this,'qt2-2',false,'tmod2')"><span class="qopt-letter">D</span>Allow it only if the test will run in an isolated network segment.</button>
-          </div>
-          <div class="quiz-fb c" id="qt2-2-c">✓ Correct. Environment separation is a core security control. Production credentials must never appear in development environments — they can be committed to dev repos, logged in dev systems, or exposed through less-secure developer workstations. Separate credentials per environment are non-negotiable.</div>
-          <div class="quiz-fb w" id="qt2-2-w">Production credentials in development environments represent a significant risk. Development systems typically have weaker controls, broader access, and more casual credential handling than production. A credential compromised in dev has production-level access. Issue environment-specific credentials.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt2-2',false,'tmod2')"><span class="qopt-letter">A</span>Allow it — the developer is trusted and it is a one-time thing.</button><button class="qopt" onclick="answer(this,'qt2-2',false,'tmod2')"><span class="qopt-letter">B</span>Allow it but require them not to save the credential locally.</button><button class="qopt" onclick="answer(this,'qt2-2',true,'tmod2')"><span class="qopt-letter">C</span>Issue a separate, scoped credential for the development/test environment. Production credentials must never be used in development environments.</button><button class="qopt" onclick="answer(this,'qt2-2',false,'tmod2')"><span class="qopt-letter">D</span>Allow it only if the test will run in an isolated network segment.</button></div>
+          <div class="quiz-fb c" id="qt2-2-c">✓ Correct. Environment separation is non-negotiable. Production credentials must never appear in development environments.</div>
+          <div class="quiz-fb w" id="qt2-2-w">Production credentials in development environments are a primary compromise vector. Once present, they can leak through dev repos, dev logs, or dev workstations.</div>
         </div>
-
         <div class="quiz-item" id="qt2-3">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 7</div><div class="quiz-q-text">What is wrong with passing a database password as a plain-text environment variable to a containerized application?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">What is wrong with passing a database password as a plain-text environment variable to a containerized application?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt2-3',false,'tmod2')"><span class="qopt-letter">A</span>Nothing — environment variables are a standard and secure method for credential injection.</button>
-            <button class="qopt" onclick="answer(this,'qt2-3',true,'Plain-text env vars appear in process listings, container inspection output, deployment manifests, and cloud provider dashboards — they\'re not a secure storage mechanism.')"><span class="qopt-letter">B</span>Plain-text env vars appear in process listings, container inspection output, deployment manifests, and cloud provider dashboards — not a secure storage mechanism.</button>
-            <button class="qopt" onclick="answer(this,'qt2-3',false,'tmod2')"><span class="qopt-letter">C</span>Nothing, as long as the container is not publicly accessible.</button>
-            <button class="qopt" onclick="answer(this,'qt2-3',false,'tmod2')"><span class="qopt-letter">D</span>Only a concern if the application logs its environment variables.</button>
-          </div>
-          <div class="quiz-fb c" id="qt2-3-c">✓ Correct. Plain-text environment variables are visible in `docker inspect`, Kubernetes pod specs, deployment dashboards, and process listings on the host. Prefer injecting secrets at runtime from a vault, or using platform-native secrets management that encrypts values at rest and controls access to reads.</div>
-          <div class="quiz-fb w" id="qt2-3-w">Environment variables are not encrypted. They appear in numerous places that aren't typically considered "secret storage" — container inspection commands, orchestration platform dashboards, cloud provider UIs, and system process listings. Use a secrets management solution that encrypts at rest.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt2-3',false,'tmod2')"><span class="qopt-letter">A</span>Nothing — environment variables are a standard and secure method for credential injection.</button><button class="qopt" onclick="answer(this,'qt2-3',true,'tmod2')"><span class="qopt-letter">B</span>Plain-text env vars appear in process listings, container inspection output, deployment manifests, and cloud provider dashboards — they are not a secure storage mechanism.</button><button class="qopt" onclick="answer(this,'qt2-3',false,'tmod2')"><span class="qopt-letter">C</span>Nothing, as long as the container is not publicly accessible.</button><button class="qopt" onclick="answer(this,'qt2-3',false,'tmod2')"><span class="qopt-letter">D</span>Only a concern if the application logs its environment variables.</button></div>
+          <div class="quiz-fb c" id="qt2-3-c">✓ Correct. Plain-text env vars are visible in docker inspect, Kubernetes pod specs, and process listings. Inject secrets at runtime from a vault instead.</div>
+          <div class="quiz-fb w" id="qt2-3-w">Environment variables are not encrypted at rest and are visible through multiple inspection paths. Use a secrets manager that injects values securely at runtime.</div>
         </div>
-
         <div class="quiz-score-bar" id="score-tmod2"><span class="score-dots" id="dots-tmod2"></span><span id="scoretext-tmod2">—</span></div>
-        <button class="btn-continue" id="tmod2-btn" disabled onclick="completeMod('tmod2','tmod3')">Continue to T3 →</button>
+        <button class="btn-continue" id="tmod2-btn" disabled onclick="completeMod('tmod2','tmod3')">Continue to Module 3 →</button>
       </div>
     </div>
   </div>
-
-  <!-- ═══════════════════════════════════════════════════════
-       T3 — NON-INTERACTIVE AUTHENTICATION
-  ═══════════════════════════════════════════════════════ -->
   <div class="module locked" id="tmod3">
     <div class="mod-header" onclick="toggleMod('tmod3')">
-      <div class="mod-num">T3</div>
-      <div class="mod-meta">
-        <div class="mod-title">Non-interactive authentication security</div>
-        <div class="mod-sub">// Service accounts, API keys, and machine-to-machine trust</div>
-      </div>
+      <div class="mod-num">03</div>
+      <div class="mod-meta"><div class="mod-title">Non-interactive authentication</div><div class="mod-sub">// SSH keys, API tokens, machine-to-machine auth</div></div>
       <span class="mod-badge badge-locked">Locked</span>
     </div>
     <div class="mod-body">
-      <h3>Machine authentication is held to a higher standard, not a lower one.</h3>
-      <p>Non-interactive authentication — where systems authenticate to each other without a human directly involved — represents a large and often under-managed attack surface. Service accounts, API keys, SSH keys, and authentication certificates used in automated processes must follow stricter controls than human accounts, not looser ones.</p>
-
-      <h4>Core requirements for non-interactive authentication</h4>
-      <ul>
-        <li><strong>Single-purpose:</strong> A service account used for monitoring must not be used for backups, batch jobs, or anything else. If the account is compromised, the blast radius is limited to that single function.</li>
-        <li><strong>No unrestricted admin:</strong> Non-interactive accounts must never have unrestricted administrator or super-user privileges. Full stop.</li>
-        <li><strong>Higher complexity than passwords:</strong> API keys, SSH keys, and certificates must be of significantly higher complexity than human passwords.</li>
-        <li><strong>Rotated at minimum annually</strong> — and within 24 hours if any person with knowledge of the secret leaves the organization or changes job responsibility.</li>
-        <li><strong>Stored in encrypted vaults</strong> with access logging. File system storage with file permissions as the only control is not acceptable for production credentials.</li>
-        <li><strong>Network-scoped where technically feasible:</strong> Use firewall rules, IP allowlists, and access control lists to restrict which systems can use a given credential. A database service account credential should only be usable from the application servers — not from a developer's laptop.</li>
-        <li><strong>Monitored for anomalous use:</strong> Service account activity should be logged and monitored for behavior that deviates from its expected function.</li>
-      </ul>
-
-      <h4>SSH key management</h4>
-      <p>SSH keys used for automated access (deployment scripts, configuration management, CI pipeline connections to servers) are authentication secrets under the same policy as API keys. Key points:</p>
-      <ul>
-        <li>Each automation use case gets its own key pair — never reuse keys across purposes.</li>
-        <li>Private keys must never be committed to source control — not even accidentally.</li>
-        <li>Key rotation is required; many organizations rotate deployment keys on every CI run using ephemeral key generation.</li>
-        <li>Unused SSH keys in <code>~/.ssh/authorized_keys</code> on servers represent standing access — audit and remove regularly.</li>
-      </ul>
-
+      <h3>Non-interactive credentials never get rotated unless you force it.</h3>
+<p>SSH keys, long-lived API tokens, and machine credentials lack the natural rotation that human passwords get. They sit unused on disk for years until a breach reveals how broadly they were trusted.</p>
+<ul>
+<li><strong>One credential per purpose:</strong> No shared service accounts spanning multiple systems.</li>
+<li><strong>Time-bound:</strong> Rotation enforced on a schedule, not on convenience.</li>
+<li><strong>Departed-engineer rotation:</strong> Any credential a leaving engineer had access to must be rotated, not just disabled.</li>
+<li><strong>SSH keys:</strong> Private keys never in repos. Public keys logged in a central authority. Personal keys not shared across automation.</li>
+</ul>
       <div class="quiz">
         <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Knowledge Check</span><span class="quiz-header-count" id="qcount-tmod3">0 / 3 answered</span></div>
-
+        
         <div class="quiz-item" id="qt3-1">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 9</div><div class="quiz-q-text">A service account is used for both database backups and application health monitoring. A security review flags this. Why?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">A service account is used for both database backups and application health monitoring. What is the problem?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt3-1',false,'It\'s efficient — fewer accounts to manage and rotate.')"><span class="qopt-letter">A</span>It's efficient — fewer accounts to manage and rotate.</button>
-            <button class="qopt" onclick="answer(this,'qt3-1',true,'tmod3')"><span class="qopt-letter">B</span>If the account is compromised via the monitoring vector, the attacker gains backup access too — potentially including the ability to delete or access backup data.</button>
-            <button class="qopt" onclick="answer(this,'qt3-1',false,'tmod3')"><span class="qopt-letter">C</span>Only a problem if the account has admin rights.</button>
-            <button class="qopt" onclick="answer(this,'qt3-1',false,'tmod3')"><span class="qopt-letter">D</span>The concern is primarily audit trail confusion, not security risk.</button>
-          </div>
-          <div class="quiz-fb c" id="qt3-1-c">✓ Correct. Multi-purpose service accounts expand blast radius. If an attacker exploits a vulnerability in the monitoring path to compromise the account, they inherit all permissions — including backup access. Single-purpose accounts contain the damage from any single compromise vector.</div>
-          <div class="quiz-fb w" id="qt3-1-w">Shared-purpose service accounts violate least privilege by definition. Compromising the account via any one of its functions grants access to all functions. Single-purpose accounts are a critical blast radius control.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt3-1',false,'tmod3')"><span class="qopt-letter">A</span>Nothing — consolidating service accounts simplifies operations.</button><button class="qopt" onclick="answer(this,'qt3-1',true,'tmod3')"><span class="qopt-letter">B</span>If the account is compromised via the monitoring vector, the attacker also has access to the database backup function — broader blast radius than either purpose required.</button><button class="qopt" onclick="answer(this,'qt3-1',false,'tmod3')"><span class="qopt-letter">C</span>Only a problem if the account has admin rights.</button><button class="qopt" onclick="answer(this,'qt3-1',false,'tmod3')"><span class="qopt-letter">D</span>The concern is primarily audit trail confusion, not security risk.</button></div>
+          <div class="quiz-fb c" id="qt3-1-c">✓ Correct. Shared service accounts compound blast radius. A compromise of one usage path gives the attacker all the access the account has across all purposes.</div>
+          <div class="quiz-fb w" id="qt3-1-w">Each service account should serve one purpose. Shared accounts make every compromise vector equivalent to a compromise of the broadest permission set.</div>
         </div>
-
         <div class="quiz-item" id="qt3-2">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 4</div><div class="quiz-q-text">An engineer who managed several critical service account credentials has left the organization. When should those credentials be rotated?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">An engineer who managed several critical service account credentials has left the company. When must those credentials be rotated?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt3-2',false,'tmod3')"><span class="qopt-letter">A</span>At the next scheduled rotation cycle — usually annually.</button>
-            <button class="qopt" onclick="answer(this,'qt3-2',false,'tmod3')"><span class="qopt-letter">B</span>Within 30 days — enough time to ensure service continuity.</button>
-            <button class="qopt" onclick="answer(this,'qt3-2',true,'Within 24 hours of the engineer\'s departure — personnel change triggers immediate rotation regardless of scheduled cycle.')"><span class="qopt-letter">C</span>Within 24 hours of the engineer's departure — personnel change triggers immediate rotation regardless of scheduled cycle.</button>
-            <button class="qopt" onclick="answer(this,'qt3-2',false,'tmod3')"><span class="qopt-letter">D</span>Only if there is evidence the credentials were misused.</button>
-          </div>
-          <div class="quiz-fb c" id="qt3-2-c">✓ Correct. Knowledge of a credential by a departed employee is grounds for immediate rotation — the 24-hour requirement applies. This is distinct from annual rotation schedules. The departing engineer's access window closes when their credentials are rotated, not when their accounts are deprovisioned.</div>
-          <div class="quiz-fb w" id="qt3-2-w">The rotation trigger is change in personnel with credential knowledge — not the annual schedule. Waiting for the next scheduled rotation leaves credentials known to a former employee active for potentially months. 24 hours is the maximum.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt3-2',false,'tmod3')"><span class="qopt-letter">A</span>At the next scheduled rotation cycle — usually annually.</button><button class="qopt" onclick="answer(this,'qt3-2',false,'tmod3')"><span class="qopt-letter">B</span>Within 30 days — enough time to ensure service continuity.</button><button class="qopt" onclick="answer(this,'qt3-2',true,'tmod3')"><span class="qopt-letter">C</span>Immediately upon termination — any credential the engineer had access to must be rotated, not just their personal accounts.</button><button class="qopt" onclick="answer(this,'qt3-2',false,'tmod3')"><span class="qopt-letter">D</span>Only if there is evidence the credentials were misused.</button></div>
+          <div class="quiz-fb c" id="qt3-2-c">✓ Correct. Departed-engineer credential rotation is mandatory and immediate. Disabling personal accounts is not sufficient — the shared credentials they accessed must also rotate.</div>
+          <div class="quiz-fb w" id="qt3-2-w">Disabling someone's individual account does not revoke their knowledge of shared service credentials. All credentials they had access to must rotate immediately.</div>
         </div>
-
         <div class="quiz-item" id="qt3-3">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 7</div><div class="quiz-q-text">A deployment script uses an SSH key to connect to production servers. The private key is stored as a file in the CI system's working directory alongside the pipeline code. What's wrong?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">A deployment script uses an SSH key to connect to production servers. The private key is committed to the deployment repository. What is wrong?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt3-3',false,'tmod3')"><span class="qopt-letter">A</span>Nothing — the CI system is secured and only authorized engineers have access.</button>
-            <button class="qopt" onclick="answer(this,'qt3-3',false,'It\'s acceptable if the key file has restricted file permissions (chmod 600).')"><span class="qopt-letter">B</span>It's acceptable if the key file has restricted file permissions (chmod 600).</button>
-            <button class="qopt" onclick="answer(this,'qt3-3',true,'The private key is in a location where it could be committed to source control, leaked in build logs, or accessed by any code that runs in the pipeline workspace. It should be stored in the CI platform\'s secrets store and injected at runtime.')"><span class="qopt-letter">C</span>The private key in the workspace could be committed to source control, leaked in build logs, or accessed by any pipeline code. Store in the CI secrets store and inject at runtime.</button>
-            <button class="qopt" onclick="answer(this,'qt3-3',false,'tmod3')"><span class="qopt-letter">D</span>Only a concern if the repository is public.</button>
-          </div>
-          <div class="quiz-fb c" id="qt3-3-c">✓ Correct. Credentials stored as files in the pipeline workspace are one accidental `git add .` or verbose log statement away from exposure. Platform-native secrets stores encrypt at rest, control access, audit reads, and inject the value as an environment variable or mounted secret at runtime — never as a file in the working directory.</div>
-          <div class="quiz-fb w" id="qt3-3-w">Pipeline workspace files are not secret storage. They can be committed, logged, printed, included in build artifacts, or accessed by any tool running in the same workspace. Use the CI platform's purpose-built secrets management with encryption at rest and access controls.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt3-3',false,'tmod3')"><span class="qopt-letter">A</span>Nothing — the CI system is secured and only authorized engineers have repo access.</button><button class="qopt" onclick="answer(this,'qt3-3',true,'tmod3')"><span class="qopt-letter">B</span>The private key should never be in a repository — it should be stored in a secrets manager and injected at run time.</button><button class="qopt" onclick="answer(this,'qt3-3',false,'tmod3')"><span class="qopt-letter">C</span>Only a concern if the key is RSA — ED25519 keys are safe in repos.</button><button class="qopt" onclick="answer(this,'qt3-3',false,'tmod3')"><span class="qopt-letter">D</span>Only a concern if the repository is public.</button></div>
+          <div class="quiz-fb c" id="qt3-3-c">✓ Correct. Private keys in repos are a credential leak waiting to happen. Repo access changes over time, mirrors get created, and history persists indefinitely.</div>
+          <div class="quiz-fb w" id="qt3-3-w">Private keys in repositories are always wrong. Repo access expands over time, history cannot be reliably purged, and CI systems may cache the key in unexpected places.</div>
         </div>
-
         <div class="quiz-score-bar" id="score-tmod3"><span class="score-dots" id="dots-tmod3"></span><span id="scoretext-tmod3">—</span></div>
-        <button class="btn-continue" id="tmod3-btn" disabled onclick="completeMod('tmod3','tmod4')">Continue to T4 →</button>
+        <button class="btn-continue" id="tmod3-btn" disabled onclick="completeMod('tmod3','tmod4')">Continue to Module 4 →</button>
       </div>
     </div>
   </div>
-
-  <!-- ═══════════════════════════════════════════════════════
-       T4 — SUPPLY CHAIN SECURITY
-  ═══════════════════════════════════════════════════════ -->
   <div class="module locked" id="tmod4">
     <div class="mod-header" onclick="toggleMod('tmod4')">
-      <div class="mod-num">T4</div>
-      <div class="mod-meta">
-        <div class="mod-title">Software supply chain security</div>
-        <div class="mod-sub">// Dependencies, open source, and the code you didn't write</div>
-      </div>
+      <div class="mod-num">04</div>
+      <div class="mod-meta"><div class="mod-title">Supply chain security</div><div class="mod-sub">// Dependencies, SBOMs, and trust transitively</div></div>
       <span class="mod-badge badge-locked">Locked</span>
     </div>
     <div class="mod-body">
-      <h3>Your application is mostly code you didn't write. That's the risk.</h3>
-      <p>Modern applications depend on hundreds or thousands of third-party and open-source packages. Each dependency represents code you're shipping to production that you didn't write, review, or control. Supply chain attacks target this trust relationship — injecting malicious code into widely-used packages or compromising the distribution mechanism itself.</p>
-
-      <h4>Key supply chain risk vectors</h4>
-      <div class="sig-grid">
-        <div class="sig-card"><h4>Dependency confusion</h4><p>Attackers publish packages to public registries with names that match internal private packages. Build systems configured to check public registries first will pull the attacker's version.</p></div>
-        <div class="sig-card"><h4>Typosquatting</h4><p>Packages with names that are common typos of popular libraries. One transposed character in an install command pulls malicious code.</p></div>
-        <div class="sig-card"><h4>Compromised maintainers</h4><p>Legitimate package maintainers whose accounts are taken over. The attack rides the reputation and existing install base of a trusted package.</p></div>
-        <div class="sig-card"><h4>Malicious updates</h4><p>A package that was legitimate when first adopted introduces malicious behavior in a later version. Pinning versions and reviewing changelogs are mitigations.</p></div>
-      </div>
-
-      <h4>Developer responsibilities in supply chain security</h4>
-      <ul>
-        <li><strong>Review before adopting:</strong> New third-party packages and open-source components must be reviewed before adoption. Check package provenance, maintainer reputation, download trends, and recent commit history.</li>
-        <li><strong>Pin dependency versions</strong> in production builds. Unpinned dependencies allow automatic updates that may introduce vulnerabilities or malicious changes without review.</li>
-        <li><strong>Verify package integrity</strong> using checksums or signature verification where supported by the package ecosystem.</li>
-        <li><strong>Scan dependencies for known vulnerabilities</strong> as part of the build process — this is a Software Composition Analysis (SCA) scan.</li>
-        <li><strong>Remove unused dependencies.</strong> Every package in your dependency tree that isn't actively used is attack surface with no benefit.</li>
-        <li><strong>Treat end-of-life dependencies as high-severity vulnerabilities.</strong> An open-source component that is no longer maintained will not receive security patches for new vulnerabilities.</li>
-        <li><strong>Never commit build artifacts, packages, or binaries to source control</strong> — use a dedicated artifact repository with integrity verification.</li>
-      </ul>
-
+      <h3>Every dependency is code you ship — and code you trust.</h3>
+<p>Your application includes thousands of lines of third-party code from hundreds of upstream maintainers. A compromise of any one of them is a compromise of your application.</p>
+<ul>
+<li><strong>Dependency review:</strong> New packages require evaluation — license, maintainer reputation, recent activity, known vulnerabilities.</li>
+<li><strong>Pinning and lockfiles:</strong> Reproducible builds require pinned versions. A "minor version update" can be a malicious patch.</li>
+<li><strong>SBOMs:</strong> Software Bill of Materials enables you to answer "are we affected?" when a vulnerability is disclosed.</li>
+<li><strong>Continuous scanning:</strong> Dependency scanners flag known CVEs as they become public — not at the next release.</li>
+</ul>
       <div class="quiz">
         <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Knowledge Check</span><span class="quiz-header-count" id="qcount-tmod4">0 / 3 answered</span></div>
-
+        
         <div class="quiz-item" id="qt4-1">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 9</div><div class="quiz-q-text">A developer adds a new open-source package to the project without a review process "because we need to ship." What risk does this introduce?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">A developer adds a new open-source package to the project without a review process. What is the risk?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt4-1',false,'tmod4')"><span class="qopt-letter">A</span>Minimal — popular open-source packages are vetted by the community.</button>
-            <button class="qopt" onclick="answer(this,'qt4-1',false,'tmod4')"><span class="qopt-letter">B</span>Only a risk if the package requests unusual system permissions.</button>
-            <button class="qopt" onclick="answer(this,'qt4-1',true,'tmod4')"><span class="qopt-letter">C</span>The package may contain known vulnerabilities, malicious code, or license issues — not visible without review. Community popularity does not guarantee security.</button>
-            <button class="qopt" onclick="answer(this,'qt4-1',false,'tmod4')"><span class="qopt-letter">D</span>Only a risk for packages with fewer than 1000 weekly downloads.</button>
-          </div>
-          <div class="quiz-fb c" id="qt4-1-c">✓ Correct. Several high-profile supply chain attacks have used extremely popular packages with millions of weekly downloads. Community adoption is not a security review. Every new dependency requires assessment of known vulnerabilities, provenance, and license before adoption.</div>
-          <div class="quiz-fb w" id="qt4-1-w">Supply chain attacks specifically target popular packages because the blast radius is enormous. Community popularity is not security validation. The review process exists to catch known vulnerabilities, license issues, and suspicious provenance — skipping it for schedule reasons is accepting unquantified risk.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt4-1',false,'tmod4')"><span class="qopt-letter">A</span>Minimal — popular open-source packages are vetted by the community.</button><button class="qopt" onclick="answer(this,'qt4-1',false,'tmod4')"><span class="qopt-letter">B</span>Only a risk if the package requests unusual system permissions.</button><button class="qopt" onclick="answer(this,'qt4-1',true,'tmod4')"><span class="qopt-letter">C</span>The package may contain known vulnerabilities, malicious code, or license obligations that conflict with your product.</button><button class="qopt" onclick="answer(this,'qt4-1',false,'tmod4')"><span class="qopt-letter">D</span>Only a risk for packages with fewer than 1000 weekly downloads.</button></div>
+          <div class="quiz-fb c" id="qt4-1-c">✓ Correct. Every dependency expands your attack surface. Review for security history, maintainer activity, license, and necessity before adoption.</div>
+          <div class="quiz-fb w" id="qt4-1-w">Popular packages are not automatically safe — supply chain attacks specifically target popular packages because their compromise has maximum reach.</div>
         </div>
-
         <div class="quiz-item" id="qt4-2">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 4</div><div class="quiz-q-text">Your project has a direct dependency that hasn't received any updates or security patches in 18 months. How should this be treated?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">Your project has a direct dependency that has not received any updates or security patches in 3 years. What should you do?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt4-2',false,'tmod4')"><span class="qopt-letter">A</span>No action needed if no known CVEs exist for the package.</button>
-            <button class="qopt" onclick="answer(this,'qt4-2',false,'tmod4')"><span class="qopt-letter">B</span>Monitor it quarterly and act if a CVE is published.</button>
-            <button class="qopt" onclick="answer(this,'qt4-2',true,'tmod4')"><span class="qopt-letter">C</span>Treat it as a high-severity risk. An unmaintained package will not receive patches for future vulnerabilities — plan to replace it.</button>
-            <button class="qopt" onclick="answer(this,'qt4-2',false,'It\'s acceptable if you pin the version and it works correctly.')"><span class="qopt-letter">D</span>It's acceptable if you pin the version and it works correctly.</button>
-          </div>
-          <div class="quiz-fb c" id="qt4-2-c">✓ Correct. End-of-life and unmaintained components are categorized as high-severity vulnerabilities by security policy — not because they necessarily have known issues today, but because they will not be fixed when issues emerge tomorrow. Plan migration before the vulnerability occurs, not after.</div>
-          <div class="quiz-fb w" id="qt4-2-w">An unmaintained component is a ticking clock. When a vulnerability is discovered — and it will be — there will be no patch. You're either left vulnerable indefinitely or forced into an emergency migration under pressure. Proactive replacement while the software still works is significantly lower risk and cost.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt4-2',false,'tmod4')"><span class="qopt-letter">A</span>No action needed if no known CVEs exist for the package.</button><button class="qopt" onclick="answer(this,'qt4-2',false,'tmod4')"><span class="qopt-letter">B</span>Monitor it quarterly and act if a CVE is published.</button><button class="qopt" onclick="answer(this,'qt4-2',true,'tmod4')"><span class="qopt-letter">C</span>Treat it as a high-severity risk. An unmaintained package will not receive patches for future CVEs — plan to replace or fork.</button><button class="qopt" onclick="answer(this,'qt4-2',false,'tmod4')"><span class="qopt-letter">D</span>Reduce alerting on it since it does not change.</button></div>
+          <div class="quiz-fb c" id="qt4-2-c">✓ Correct. An unmaintained dependency means future vulnerabilities will go unpatched. Plan for replacement before a CVE forces an emergency response.</div>
+          <div class="quiz-fb w" id="qt4-2-w">Unmaintained packages are a known liability. The absence of current CVEs is not safety — it is silence until the next disclosure forces an emergency.</div>
         </div>
-
         <div class="quiz-item" id="qt4-3">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 7</div><div class="quiz-q-text">What is dependency pinning and why does it matter for security?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">What is dependency pinning and why does it matter for security?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt4-3',false,'Pinning locks the UI framework version — it\'s a front-end concept only.')"><span class="qopt-letter">A</span>Pinning locks the UI framework version — it's a front-end concept only.</button>
-            <button class="qopt" onclick="answer(this,'qt4-3',false,'tmod4')"><span class="qopt-letter">B</span>Pinning is a performance optimization that prevents unnecessary package downloads.</button>
-            <button class="qopt" onclick="answer(this,'qt4-3',true,'Pinning specifies exact dependency versions so that builds are reproducible and automatic updates can\'t silently introduce changed or malicious code without a deliberate review.')"><span class="qopt-letter">C</span>Pinning specifies exact dependency versions so builds are reproducible and updates can't silently introduce changed or malicious code without deliberate review.</button>
-            <button class="qopt" onclick="answer(this,'qt4-3',false,'tmod4')"><span class="qopt-letter">D</span>Pinning prevents developers from using outdated packages.</button>
-          </div>
-          <div class="quiz-fb c" id="qt4-3-c">✓ Correct. Unpinned dependencies mean that `npm install` or `pip install` today may pull a different package version than it did yesterday — potentially one with newly introduced malicious code. Pinning ensures every build pulls exactly the same code, making changes reviewable and intentional.</div>
-          <div class="quiz-fb w" id="qt4-3-w">Without pinning, your build process may silently pull updated package versions that contain vulnerabilities or malicious changes. Pinning makes dependency updates a deliberate, reviewable act rather than an automatic, invisible one.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt4-3',false,'tmod4')"><span class="qopt-letter">A</span>Pinning prevents automatic security updates — it should generally be avoided.</button><button class="qopt" onclick="answer(this,'qt4-3',false,'tmod4')"><span class="qopt-letter">B</span>Pinning is a performance optimization that prevents unnecessary package downloads.</button><button class="qopt" onclick="answer(this,'qt4-3',true,'tmod4')"><span class="qopt-letter">C</span>Pinning fixes the exact version of each dependency so builds are reproducible — and prevents a compromised upstream release from being silently pulled in.</button><button class="qopt" onclick="answer(this,'qt4-3',false,'tmod4')"><span class="qopt-letter">D</span>Pinning prevents developers from using outdated packages.</button></div>
+          <div class="quiz-fb c" id="qt4-3-c">✓ Correct. Pinned versions plus lockfile integrity checks ensure the exact same code is built every time, and prevent silent injection of malicious updates.</div>
+          <div class="quiz-fb w" id="qt4-3-w">Pinning is the foundation of reproducible builds and supply chain integrity. Without it, a malicious upstream release can be pulled into your build automatically.</div>
         </div>
-
         <div class="quiz-score-bar" id="score-tmod4"><span class="score-dots" id="dots-tmod4"></span><span id="scoretext-tmod4">—</span></div>
-        <button class="btn-continue" id="tmod4-btn" disabled onclick="completeMod('tmod4','tmod5')">Continue to T5 →</button>
+        <button class="btn-continue" id="tmod4-btn" disabled onclick="completeMod('tmod4','tmod5')">Continue to Module 5 →</button>
       </div>
     </div>
   </div>
-
-  <!-- ═══════════════════════════════════════════════════════
-       T5 — SAST PRINCIPLES
-  ═══════════════════════════════════════════════════════ -->
   <div class="module locked" id="tmod5">
     <div class="mod-header" onclick="toggleMod('tmod5')">
-      <div class="mod-num">T5</div>
-      <div class="mod-meta">
-        <div class="mod-title">Static Application Security Testing (SAST)</div>
-        <div class="mod-sub">// Finding vulnerabilities before the code runs</div>
-      </div>
+      <div class="mod-num">05</div>
+      <div class="mod-meta"><div class="mod-title">SAST — static analysis</div><div class="mod-sub">// Catching vulnerabilities before they ship</div></div>
       <span class="mod-badge badge-locked">Locked</span>
     </div>
     <div class="mod-body">
-      <h3>SAST finds what code reviews miss — automatically, at scale, before deployment.</h3>
-      <p>Static Application Security Testing analyzes source code, bytecode, or binaries without executing the application. It identifies classes of vulnerability — injection flaws, insecure cryptographic practices, hardcoded credentials, unsafe API usage — by examining code structure and data flow patterns.</p>
-
-      <h4>What SAST finds</h4>
-      <table class="risk-table">
-        <thead><tr><th>Vulnerability Class</th><th>Example</th><th>Typical Severity</th></tr></thead>
-        <tbody>
-          <tr><td>Injection (SQL, LDAP, command)</td><td>User input concatenated directly into a query</td><td><span class="severity sev-critical">Critical</span></td></tr>
-          <tr><td>Hardcoded credentials</td><td>API keys, passwords in source code</td><td><span class="severity sev-critical">Critical</span></td></tr>
-          <tr><td>Insecure cryptography</td><td>Use of MD5/SHA1 for password hashing, ECB mode</td><td><span class="severity sev-high">High</span></td></tr>
-          <tr><td>Insecure deserialization</td><td>Deserializing untrusted data without validation</td><td><span class="severity sev-high">High</span></td></tr>
-          <tr><td>Path traversal</td><td>User-controlled file paths without sanitization</td><td><span class="severity sev-high">High</span></td></tr>
-          <tr><td>Insecure randomness</td><td>Using predictable random for session tokens or keys</td><td><span class="severity sev-medium">Medium</span></td></tr>
-          <tr><td>Missing input validation</td><td>Unvalidated user input reaching sensitive operations</td><td><span class="severity sev-medium">Medium</span></td></tr>
-        </tbody>
-      </table>
-
-      <h4>SAST in the development lifecycle</h4>
-      <ul>
-        <li><strong>Shift left:</strong> SAST is most valuable when integrated early — in the IDE during development, in pre-commit hooks before code reaches the repository, and in CI pipelines on every pull request. Findings caught in development cost a fraction of those found in production.</li>
-        <li><strong>Build gate integration:</strong> Critical and high severity findings should block merges or deployments. Teams that allow critical SAST findings to ship accumulate technical security debt that becomes increasingly expensive to remediate.</li>
-        <li><strong>Remediate before release:</strong> All critical and high severity SAST findings must be addressed before release. Document and justify false positives with technical rationale — do not simply suppress findings without documented review.</li>
-        <li><strong>SAST is not sufficient alone:</strong> Static analysis finds structural vulnerabilities in code but cannot detect configuration issues, runtime behavior, or vulnerabilities that emerge from how components interact. It must be combined with other testing approaches.</li>
-      </ul>
-
-      <h4>False positives — a real challenge</h4>
-      <p>SAST tools generate false positives — findings that are flagged as vulnerabilities but are not actually exploitable in context. The correct response is to <strong>review and document the justification</strong>, not to suppress or ignore the finding. A suppression without documented rationale is a future liability — when something similar turns out to be a real vulnerability, there's no record of why it was dismissed.</p>
-
+      <h3>Static analysis catches what your test suite cannot.</h3>
+<p>SAST tools read source code to find patterns associated with security flaws — injection sinks, unsafe deserialization, hardcoded secrets, dangerous string concatenations. They run before code ships, which is the cheapest possible time to fix.</p>
+<ul>
+<li><strong>Run on every PR:</strong> Findings caught in review never become deployed vulnerabilities.</li>
+<li><strong>Block on critical findings:</strong> Critical-severity issues fail the build. Lower severities create tickets.</li>
+<li><strong>Triage false positives:</strong> SAST tools generate noise. Suppressions require documented justification.</li>
+<li><strong>Backlog management:</strong> Accumulated medium findings often chain into a single critical exploit path.</li>
+</ul>
       <div class="quiz">
         <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Knowledge Check</span><span class="quiz-header-count" id="qcount-tmod5">0 / 3 answered</span></div>
-
+        
         <div class="quiz-item" id="qt5-1">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 9</div><div class="quiz-q-text">A SAST scan returns a critical finding: a user-controlled string is being passed directly to a SQL query without parameterization. The developer says the input is "validated on the front end." Is this finding a false positive?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">A SAST scan returns a critical finding: a user-controlled string is being passed directly into a SQL query. The developer says "the front end validates that input." Is this an acceptable mitigation?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt5-1',false,'tmod5')"><span class="qopt-letter">A</span>Yes — front-end validation is sufficient to prevent injection.</button>
-            <button class="qopt" onclick="answer(this,'qt5-1',false,'tmod5')"><span class="qopt-letter">B</span>Possibly — depends on what the front-end validation checks.</button>
-            <button class="qopt" onclick="answer(this,'qt5-1',true,'tmod5')"><span class="qopt-letter">C</span>No — front-end validation can be bypassed by any client sending a direct request. Server-side parameterization is required.</button>
-            <button class="qopt" onclick="answer(this,'qt5-1',false,'tmod5')"><span class="qopt-letter">D</span>Yes — if the application only accepts requests from the official front end.</button>
-          </div>
-          <div class="quiz-fb c" id="qt5-1-c">✓ Correct. Front-end validation is a UX control, not a security control. Any attacker can bypass the browser entirely and send arbitrary data directly to the API. SQL injection prevention requires server-side parameterized queries — the input pathway doesn't matter.</div>
-          <div class="quiz-fb w" id="qt5-1-w">Never rely on front-end validation for security. HTTP requests can be crafted by any client and sent directly to your endpoints, completely bypassing browser-side validation. The only valid SQL injection control is server-side parameterized queries or prepared statements.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt5-1',false,'tmod5')"><span class="qopt-letter">A</span>Yes — front-end validation is sufficient to prevent injection.</button><button class="qopt" onclick="answer(this,'qt5-1',false,'tmod5')"><span class="qopt-letter">B</span>Possibly — depends on what the front-end validation checks.</button><button class="qopt" onclick="answer(this,'qt5-1',true,'tmod5')"><span class="qopt-letter">C</span>No — front-end validation can be bypassed by any client sending a direct API request. Use parameterized queries.</button><button class="qopt" onclick="answer(this,'qt5-1',false,'tmod5')"><span class="qopt-letter">D</span>Yes — if the application only accepts requests from the official front end.</button></div>
+          <div class="quiz-fb c" id="qt5-1-c">✓ Correct. Client-side validation is a UX feature, not a security control. The fix is parameterized queries — front-end checks do not protect the database.</div>
+          <div class="quiz-fb w" id="qt5-1-w">Front-end validation is trivial to bypass. Anyone with a curl command can send arbitrary input to your API. SQL injection fixes belong on the server.</div>
         </div>
-
         <div class="quiz-item" id="qt5-2">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 4</div><div class="quiz-q-text">Your team has accumulated 47 open SAST findings, mostly medium severity, none blocked by the build gate. They've been open for 6 months. What risk does this represent?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">Your team has accumulated 47 open SAST findings, mostly medium severity, none blocking. What is the actual risk?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt5-2',false,'tmod5')"><span class="qopt-letter">A</span>Low — medium severity findings rarely lead to actual breaches.</button>
-            <button class="qopt" onclick="answer(this,'qt5-2',false,'tmod5')"><span class="qopt-letter">B</span>Moderate — but manageable if the build gate catches critical findings.</button>
-            <button class="qopt" onclick="answer(this,'qt5-2',true,'tmod5')"><span class="qopt-letter">C</span>Significant — accumulated medium findings may chain into critical exploits, and represent a growing security debt that becomes harder to address over time.</button>
-            <button class="qopt" onclick="answer(this,'qt5-2',false,'No risk — medium findings are informational and don\'t require action.')"><span class="qopt-letter">D</span>No risk — medium findings are informational and don't require action.</button>
-          </div>
-          <div class="quiz-fb c" id="qt5-2-c">✓ Correct. Medium findings can chain — an information disclosure finding combined with an authentication weakness can form a critical exploit path. Beyond the technical risk, a backlog of 47 unaddressed findings signals that the security testing process is producing findings no one acts on — which undermines the entire program.</div>
-          <div class="quiz-fb w" id="qt5-2-w">Accumulated security debt compounds. Multiple medium findings can combine into critical exploit chains. More broadly, a large unaddressed SAST backlog signals that findings aren't driving behavior change — which means the scanning process is producing noise, not security improvement. Address findings systematically.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt5-2',false,'tmod5')"><span class="qopt-letter">A</span>Low — medium severity findings rarely lead to actual breaches.</button><button class="qopt" onclick="answer(this,'qt5-2',false,'tmod5')"><span class="qopt-letter">B</span>Moderate — but manageable if the build gate catches critical findings.</button><button class="qopt" onclick="answer(this,'qt5-2',true,'tmod5')"><span class="qopt-letter">C</span>Significant — accumulated medium findings often chain into a critical exploit path that no single finding would have flagged.</button><button class="qopt" onclick="answer(this,'qt5-2',false,'tmod5')"><span class="qopt-letter">D</span>Low — modern frameworks mitigate most medium-severity issues.</button></div>
+          <div class="quiz-fb c" id="qt5-2-c">✓ Correct. Chained medium findings are the source of most real breaches. A backlog of "manageable" findings is a chained exploit waiting to be assembled.</div>
+          <div class="quiz-fb w" id="qt5-2-w">Severity ratings score individual findings, not their interactions. Real attackers chain medium issues together to reach impact that no single finding predicted.</div>
         </div>
-
         <div class="quiz-item" id="qt5-3">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 7</div><div class="quiz-q-text">A SAST finding appears to be a false positive — the vulnerability pattern exists in the code but the data flow that would make it exploitable doesn't. What is the correct way to handle this?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">A SAST finding appears to be a false positive — the vulnerability pattern exists but the surrounding code makes it unreachable. What is the right response?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt5-3',false,'tmod5')"><span class="qopt-letter">A</span>Suppress the finding in the tool to remove it from future reports.</button>
-            <button class="qopt" onclick="answer(this,'qt5-3',false,'tmod5')"><span class="qopt-letter">B</span>Ignore it — false positives are expected with SAST tools.</button>
-            <button class="qopt" onclick="answer(this,'qt5-3',true,'tmod5')"><span class="qopt-letter">C</span>Document the technical justification for the false positive determination, get a peer review, and record the disposition with rationale.</button>
-            <button class="qopt" onclick="answer(this,'qt5-3',false,'tmod5')"><span class="qopt-letter">D</span>Re-run the scan — if it flags it again, it must be real.</button>
-          </div>
-          <div class="quiz-fb c" id="qt5-3-c">✓ Correct. False positives require documented, reviewed dispositions — not silent suppression. The documented rationale protects your team when auditors review findings, and ensures that if the pattern later becomes exploitable (due to a code change), there's a record of the prior assessment to review and update.</div>
-          <div class="quiz-fb w" id="qt5-3-w">Suppressing findings without documentation creates invisible risk. Code evolves — a pattern that's not exploitable today may become exploitable when another component changes. Without a documented disposition, future reviewers have no way to know the finding was assessed rather than overlooked.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt5-3',false,'tmod5')"><span class="qopt-letter">A</span>Suppress the finding in the tool to remove it from future reports.</button><button class="qopt" onclick="answer(this,'qt5-3',false,'tmod5')"><span class="qopt-letter">B</span>Ignore it — false positives are expected with SAST tools.</button><button class="qopt" onclick="answer(this,'qt5-3',true,'tmod5')"><span class="qopt-letter">C</span>Document the technical justification for the false positive determination, then suppress with that comment attached. Review periodically.</button><button class="qopt" onclick="answer(this,'qt5-3',false,'tmod5')"><span class="qopt-letter">D</span>Re-run the scan — if it flags it again, it must be real.</button></div>
+          <div class="quiz-fb c" id="qt5-3-c">✓ Correct. Suppressions are fine when justified — but the justification must be documented and reviewed periodically in case surrounding code changes.</div>
+          <div class="quiz-fb w" id="qt5-3-w">Undocumented suppressions accumulate and become invisible risks. Every suppression needs a written reason that a future engineer can review.</div>
         </div>
-
         <div class="quiz-score-bar" id="score-tmod5"><span class="score-dots" id="dots-tmod5"></span><span id="scoretext-tmod5">—</span></div>
-        <button class="btn-continue" id="tmod5-btn" disabled onclick="completeMod('tmod5','tmod6')">Continue to T6 →</button>
+        <button class="btn-continue" id="tmod5-btn" disabled onclick="completeMod('tmod5','tmod6')">Continue to Module 6 →</button>
       </div>
     </div>
   </div>
-
-  <!-- ═══════════════════════════════════════════════════════
-       T6 — DAST & RUNTIME SECURITY
-  ═══════════════════════════════════════════════════════ -->
   <div class="module locked" id="tmod6">
     <div class="mod-header" onclick="toggleMod('tmod6')">
-      <div class="mod-num">T6</div>
-      <div class="mod-meta">
-        <div class="mod-title">DAST & runtime security testing</div>
-        <div class="mod-sub">// Finding vulnerabilities in running applications</div>
-      </div>
+      <div class="mod-num">06</div>
+      <div class="mod-meta"><div class="mod-title">DAST & runtime security</div><div class="mod-sub">// Behavioral testing and production safeguards</div></div>
       <span class="mod-badge badge-locked">Locked</span>
     </div>
     <div class="mod-body">
-      <h3>Static analysis sees the code. Dynamic testing sees what the code actually does.</h3>
-      <p>Dynamic Application Security Testing (DAST) tests a running application by sending crafted requests and analyzing responses — simulating how an attacker would interact with the application from the outside. Unlike SAST, DAST doesn't require access to source code and is language-agnostic.</p>
-
-      <h4>SAST vs DAST — complementary, not competing</h4>
-      <table class="risk-table">
-        <thead><tr><th>Dimension</th><th>SAST</th><th>DAST</th></tr></thead>
-        <tbody>
-          <tr><td>What it tests</td><td>Source code structure and patterns</td><td>Running application behavior</td></tr>
-          <tr><td>When in lifecycle</td><td>Development, pre-commit, CI</td><td>Pre-release, staging, production</td></tr>
-          <tr><td>Source code required</td><td>Yes</td><td>No</td></tr>
-          <tr><td>Runtime config issues</td><td>Cannot detect</td><td>Detects</td></tr>
-          <tr><td>Authentication flows</td><td>Limited detection</td><td>Can test fully</td></tr>
-          <tr><td>Business logic flaws</td><td>Very limited</td><td>Better coverage</td></tr>
-          <tr><td>False positive rate</td><td>Higher</td><td>Lower (observed behavior)</td></tr>
-        </tbody>
-      </table>
-
-      <h4>What DAST uniquely finds</h4>
-      <ul>
-        <li><strong>Authentication and session management flaws:</strong> Session fixation, session tokens that don't expire, predictable token values, authentication bypass through parameter manipulation.</li>
-        <li><strong>Security header misconfigurations:</strong> Missing or misconfigured Content-Security-Policy, X-Frame-Options, HSTS, and cookie security attributes.</li>
-        <li><strong>Server-side request forgery (SSRF):</strong> Can the application be manipulated into making requests to internal infrastructure?</li>
-        <li><strong>Exposed sensitive endpoints:</strong> Admin interfaces, debug endpoints, internal API paths inadvertently accessible from the public-facing application.</li>
-        <li><strong>Error handling and information disclosure:</strong> Stack traces, connection strings, and internal paths revealed in error responses.</li>
-        <li><strong>TLS and transport security issues:</strong> Weak cipher suites, expired certificates, mixed content.</li>
-      </ul>
-
-      <h4>Running DAST responsibly</h4>
-      <p>DAST sends active attack payloads to a running application. This means:</p>
-      <ul>
-        <li><strong>Never run DAST against production without explicit authorization and controls</strong> in place to prevent test data from contaminating real data.</li>
-        <li>DAST is typically run against a production-equivalent staging environment.</li>
-        <li>Inform operations teams before running DAST — active scanning can look like an attack and trigger incident response.</li>
-        <li>Scan results should be reviewed for both the reported findings and any unexpected application behavior observed during the test.</li>
-      </ul>
-
-      <h4>Secure development lifecycle integration</h4>
-      <p>A mature security testing program integrates multiple layers:</p>
-      <ul>
-        <li>SAST on every commit and PR (shift-left, fast feedback)</li>
-        <li>SCA (Software Composition Analysis) scanning for known vulnerable dependencies on every build</li>
-        <li>Secret scanning to prevent credential commits</li>
-        <li>DAST on every release candidate in staging</li>
-        <li>Penetration testing periodically and for major releases</li>
-      </ul>
-      <p>Each layer catches different classes of vulnerability. Removing any one layer creates a blind spot. The goal is defense in depth — multiple overlapping controls so that a finding missed by one method is likely caught by another.</p>
-
+      <h3>Code reads clean, runs broken.</h3>
+<p>Dynamic Application Security Testing (DAST) exercises the running application — sending real requests, looking at real responses, observing real behavior. It finds what static analysis misses: misconfigurations, authentication bypasses, business logic flaws.</p>
+<ul>
+<li><strong>Run against staging:</strong> DAST sends active attack payloads. It can corrupt data, trigger alerts, or take down services — do not run it against production without explicit coordination.</li>
+<li><strong>Authenticated scans:</strong> Most vulnerabilities are post-authentication. Configure DAST with valid credentials to reach them.</li>
+<li><strong>Information disclosure findings:</strong> Stack traces, server banners, and verbose errors give attackers reconnaissance. Treat as medium-to-high risk.</li>
+<li><strong>Pair with SAST:</strong> Neither tool alone catches everything. Use them together.</li>
+</ul>
       <div class="quiz">
         <div class="quiz-header-bar"><span class="quiz-header-icon">📝</span><span class="quiz-header-text">Knowledge Check</span><span class="quiz-header-count" id="qcount-tmod6">0 / 3 answered</span></div>
-
+        
         <div class="quiz-item" id="qt6-1">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 9</div><div class="quiz-q-text">A SAST scan came back clean on a web application. Is it safe to deploy to production?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 1</div><div class="quiz-q-text">A SAST scan came back clean on a web application. Is it safe to deploy to production?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt6-1',false,'tmod6')"><span class="qopt-letter">A</span>Yes — a clean SAST scan means no significant vulnerabilities.</button>
-            <button class="qopt" onclick="answer(this,'qt6-1',false,'tmod6')"><span class="qopt-letter">B</span>Yes, if the codebase is small and was thoroughly code-reviewed.</button>
-            <button class="qopt" onclick="answer(this,'qt6-1',true,'Not necessarily — SAST doesn\'t test runtime behavior, configuration, authentication flows, or deployment environment. DAST and other testing layers are also required.')"><span class="qopt-letter">C</span>Not necessarily — SAST doesn't test runtime behavior, configuration, authentication, or the deployment environment. DAST and other testing layers are also required.</button>
-            <button class="qopt" onclick="answer(this,'qt6-1',false,'tmod6')"><span class="qopt-letter">D</span>Only if SAST was run with the strictest rule set.</button>
-          </div>
-          <div class="quiz-fb c" id="qt6-1-c">✓ Correct. SAST is one layer of a defense-in-depth testing strategy. It finds code-level structural issues but cannot detect runtime configuration vulnerabilities, authentication bypass through legitimate flows, security header misconfigurations, or business logic flaws. A complete pre-production process requires DAST, SCA, and potentially penetration testing.</div>
-          <div class="quiz-fb w" id="qt6-1-w">SAST covers code structure but has significant blind spots. Authentication flows, session management, security response headers, server-side request forgery, and misconfigured infrastructure are all invisible to static analysis. A clean SAST scan is necessary but not sufficient.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt6-1',false,'tmod6')"><span class="qopt-letter">A</span>Yes — a clean SAST scan means no significant vulnerabilities.</button><button class="qopt" onclick="answer(this,'qt6-1',false,'tmod6')"><span class="qopt-letter">B</span>Yes, if the codebase is small and was thoroughly code-reviewed.</button><button class="qopt" onclick="answer(this,'qt6-1',true,'tmod6')"><span class="qopt-letter">C</span>No — SAST cannot find runtime configuration issues, authentication flaws, or business logic vulnerabilities. DAST and security review are still required.</button><button class="qopt" onclick="answer(this,'qt6-1',false,'tmod6')"><span class="qopt-letter">D</span>Only if SAST was run with the strictest rule set.</button></div>
+          <div class="quiz-fb c" id="qt6-1-c">✓ Correct. SAST and DAST cover different vulnerability classes. A clean SAST scan rules out certain patterns but does not certify the running application.</div>
+          <div class="quiz-fb w" id="qt6-1-w">SAST is one layer in a defense-in-depth approach. Auth flaws, business logic errors, and config issues are invisible to source-code analysis.</div>
         </div>
-
         <div class="quiz-item" id="qt6-2">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 4</div><div class="quiz-q-text">Why should DAST not be run against a production environment without specific controls in place?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 2</div><div class="quiz-q-text">Why should DAST not be run against a production environment without specific controls?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt6-2',false,'tmod6')"><span class="qopt-letter">A</span>DAST is only effective in development environments.</button>
-            <button class="qopt" onclick="answer(this,'qt6-2',true,'tmod6')"><span class="qopt-letter">B</span>DAST sends active attack payloads that can corrupt real data, trigger false alarms in security monitoring, and potentially disrupt service.</button>
-            <button class="qopt" onclick="answer(this,'qt6-2',false,'DAST tools aren\'t licensed for production use.')"><span class="qopt-letter">C</span>DAST tools aren't licensed for production use.</button>
-            <button class="qopt" onclick="answer(this,'qt6-2',false,'tmod6')"><span class="qopt-letter">D</span>Production environments are already protected by WAFs, making DAST redundant.</button>
-          </div>
-          <div class="quiz-fb c" id="qt6-2-c">✓ Correct. DAST fuzzes the application with malformed, malicious, and boundary-condition inputs. Against a production database, test records may be created or real data corrupted. Active scanning traffic may trigger security incident response. Most DAST testing is performed in a staging environment that mirrors production configuration.</div>
-          <div class="quiz-fb w" id="qt6-2-w">DAST is active — not passive. It deliberately sends attack payloads to the application. In production, this risks data corruption, service impact, and false security alerts. DAST against production requires authorization, data isolation controls, and coordination with operations teams.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt6-2',false,'tmod6')"><span class="qopt-letter">A</span>DAST is only effective in development environments.</button><button class="qopt" onclick="answer(this,'qt6-2',true,'tmod6')"><span class="qopt-letter">B</span>DAST sends active attack payloads that can corrupt real data, trigger alerts, take down services, or cause unexpected side effects.</button><button class="qopt" onclick="answer(this,'qt6-2',false,'tmod6')"><span class="qopt-letter">C</span>DAST cannot reach production-only code paths.</button><button class="qopt" onclick="answer(this,'qt6-2',false,'tmod6')"><span class="qopt-letter">D</span>Production environments are already protected by WAFs, making DAST redundant.</button></div>
+          <div class="quiz-fb c" id="qt6-2-c">✓ Correct. DAST sends real attack traffic. Against production, this can corrupt data, fill alerting queues, or cause outages. Run against staging mirrors.</div>
+          <div class="quiz-fb w" id="qt6-2-w">DAST scans send active attack payloads that production cannot distinguish from real attacks. Use staging environments that mirror production.</div>
         </div>
-
         <div class="quiz-item" id="qt6-3">
-          <div class="quiz-question-panel"><div class="quiz-q-num">Question 7</div><div class="quiz-q-text">Your application's DAST scan finds that the server is returning detailed stack traces in 500 error responses, including file paths and internal hostnames. What severity is this and why?</div></div>
+          <div class="quiz-question-panel"><div class="quiz-q-num">Question 3</div><div class="quiz-q-text">Your application's DAST scan finds that the server is returning detailed stack traces in error responses. What is the severity?</div></div>
           <div class="quiz-answers-label">Select one answer</div>
-          <div class="quiz-opts">
-            <button class="qopt" onclick="answer(this,'qt6-3',false,'tmod6')"><span class="qopt-letter">A</span>Low — error messages are only visible to authenticated users.</button>
-            <button class="qopt" onclick="answer(this,'qt6-3',false,'Informational only — stack traces help developers debug but don\'t give attackers access.')"><span class="qopt-letter">B</span>Informational only — stack traces help developers debug but don't give attackers access.</button>
-            <button class="qopt" onclick="answer(this,'qt6-3',true,'tmod6')"><span class="qopt-letter">C</span>Medium to High — error disclosure provides attackers with infrastructure intelligence that significantly aids targeted attack development.</button>
-            <button class="qopt" onclick="answer(this,'qt6-3',false,'tmod6')"><span class="qopt-letter">D</span>Critical — stack traces allow direct remote code execution.</button>
-          </div>
-          <div class="quiz-fb c" id="qt6-3-c">✓ Correct. Information disclosure through error messages is typically medium severity but has significant impact on attacker effectiveness. Internal paths reveal the framework and language, file system structure aids path traversal attempts, and internal hostnames support network reconnaissance. This is exactly the intelligence an attacker uses to tailor subsequent attacks.</div>
-          <div class="quiz-fb w" id="qt6-3-w">Error information disclosure is classified as medium-to-high severity because it functions as reconnaissance intelligence. While it doesn't directly enable exploitation, the framework name, version, file paths, and internal hostnames all help an attacker tailor subsequent attacks to your specific environment. Production error responses should return generic messages with a reference ID — detailed errors belong only in internal logs.</div>
+          <div class="quiz-opts"><button class="qopt" onclick="answer(this,'qt6-3',false,'tmod6')"><span class="qopt-letter">A</span>Low — error messages are only visible to authenticated users.</button><button class="qopt" onclick="answer(this,'qt6-3',false,'tmod6')"><span class="qopt-letter">B</span>Low — stack traces help with debugging and rarely lead to compromise.</button><button class="qopt" onclick="answer(this,'qt6-3',true,'tmod6')"><span class="qopt-letter">C</span>Medium to high — error disclosure provides attackers with infrastructure details, framework versions, and code paths that enable targeted attacks.</button><button class="qopt" onclick="answer(this,'qt6-3',false,'tmod6')"><span class="qopt-letter">D</span>Critical — stack traces allow direct remote code execution.</button></div>
+          <div class="quiz-fb c" id="qt6-3-c">✓ Correct. Information disclosure is a reconnaissance win for attackers. Stack traces reveal versions, paths, and internal structure that focus subsequent attacks.</div>
+          <div class="quiz-fb w" id="qt6-3-w">Verbose error pages are a reconnaissance gift. They reveal framework versions, file paths, and architecture details that turn blind attacks into targeted ones.</div>
         </div>
-
         <div class="quiz-score-bar" id="score-tmod6"><span class="score-dots" id="dots-tmod6"></span><span id="scoretext-tmod6">—</span></div>
         <button class="btn-continue" id="tmod6-btn" disabled onclick="finishTrack()">Complete Technical Track →</button>
       </div>
