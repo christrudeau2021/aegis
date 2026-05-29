@@ -823,186 +823,202 @@
 </div>
 
 <script>
-// ── SESSION & GATE ────────────────────────────────────────────────────────────
-const token   = sessionStorage.getItem('aegis_token');
-const uName   = sessionStorage.getItem('aegis_name') || '';
-const uOrg    = sessionStorage.getItem('aegis_org')  || '';
-const role    = sessionStorage.getItem('aegis_role') || 'developer';
-const genDone = sessionStorage.getItem('aegis_general_complete') === 'true';
+var token = sessionStorage.getItem('aegis_token');
+var uName = sessionStorage.getItem('aegis_name') || '';
+var uOrg  = sessionStorage.getItem('aegis_org')  || '';
+var role  = sessionStorage.getItem('aegis_role') || 'developer';
 
-// Must have registered
-if (!token) { window.location.href = '/'; }
+// Token check is soft - quiz works without it, certificate just won't issue
 
-// Must have completed general track first
-if (!genDone) {
-  // Show a gate banner and block progress
-  document.addEventListener('DOMContentLoaded', () => {
-    const banner = document.createElement('div');
-    banner.style.cssText = 'position:fixed;top:64px;left:0;right:0;z-index:200;background:#0a1928;border-bottom:1px solid rgba(245,158,11,0.3);padding:14px 40px;display:flex;align-items:center;gap:14px;';
-    banner.innerHTML = '<span style="font-size:18px">⚠️</span><p style="font-size:13px;color:#fde68a;font-family:'IBM Plex Mono',monospace;">You must complete the <a href="/training/general" style="color:#f59e0b;font-weight:600;">General Awareness Track</a> before unlocking the Technical Track.</p>';
-    document.body.prepend(banner);
-    // Lock all modules
-    document.querySelectorAll('.tmod').forEach(m => {
-      if (!m.classList.contains('locked')) {
-        m.classList.add('locked');
-        m.style.opacity = '0.3';
-        m.style.pointerEvents = 'none';
-      }
-    });
-  });
-}
-
-const ROLE_LABELS = {
+var ROLE_LABELS = {
+  developer:'Developer', devsecops:'DevSecOps',
   executive:'Executive', finance:'Finance', hr:'HR / People Ops',
-  legal:'Legal', it:'IT & Security', operations:'Operations',
-  developer:'Developer', devsecops:'DevSecOps'
+  legal:'Legal', it:'IT & Security', operations:'Operations'
 };
 document.getElementById('navRole').textContent = ROLE_LABELS[role] || role;
 
-// ── PROGRESS ──────────────────────────────────────────────────────────────────
-const TOTAL = 6;
-let done = new Set();
-function updateProg() {
-  const n = done.size;
-  document.getElementById('progTxt').textContent = `${n} of ${TOTAL} complete`;
-  document.getElementById('progFill').style.width = `${(n / TOTAL) * 100}%`;
+var TOTAL_MODS = 6;
+var doneMods = [];
+function updateProgress() {
+  var n = doneMods.length;
+  document.getElementById('progressText').textContent = n + ' of ' + TOTAL_MODS + ' complete';
+  document.getElementById('progressFill').style.width = (n / TOTAL_MODS * 100) + '%';
 }
 
-// ── MODULE TOGGLE ─────────────────────────────────────────────────────────────
-function toggle(id) {
-  const el = document.getElementById(id);
-  if (el.classList.contains('locked')) return;
+function toggleMod(id) {
+  var el = document.getElementById(id);
+  if (!el || el.classList.contains('locked')) return;
   el.classList.toggle('open');
 }
 
-// ── QUIZ ──────────────────────────────────────────────────────────────────────
-const state = {};
-const modQCount = { tmod1:4, tmod2:3, tmod3:3, tmod4:3, tmod5:3, tmod6:3 };
+var answered = {};
+var MOD_Q_COUNT = { tmod1:4, tmod2:3, tmod3:3, tmod4:3, tmod5:3, tmod6:3 };
 
-function answer(btn, qId, isCorrect, modId) {
-  if (state[qId]?.answered) return;
-  state[qId] = { answered: true, correct: isCorrect };
+function answer(btn, qId, correct, modId) {
+  if (answered[qId]) return;
+  answered[qId] = { correct: correct };
 
-  btn.closest('.quiz-opts').querySelectorAll('.qopt').forEach(o => o.disabled = true);
-  btn.classList.add(isCorrect ? 'correct' : 'wrong');
-  document.getElementById(qId + (isCorrect ? '-c' : '-w')).classList.add('show');
+  var opts = btn.closest('.quiz-opts');
+  if (opts) {
+    Array.from(opts.querySelectorAll('.qopt')).forEach(function(o) { o.disabled = true; });
+  }
+  btn.classList.add(correct ? 'correct' : 'wrong');
 
-  const mod   = document.getElementById(modId);
-  const items = mod.querySelectorAll('.quiz-item');
-  const nDone = [...items].filter(i => state[i.id]?.answered).length;
-  document.getElementById(`qcount-${modId}`).textContent = `${nDone} / ${modQCount[modId]}`;
+  var fb = document.getElementById(qId + (correct ? '-c' : '-w'));
+  if (fb) fb.classList.add('show');
 
-  if (nDone === items.length) {
-    const nCorrect = [...items].filter(i => state[i.id]?.correct).length;
-    const sb = document.getElementById(`score-${modId}`);
-    sb.classList.add('show');
-    document.getElementById(`dots-${modId}`).innerHTML =
-      [...items].map(i =>
-        `<span class="score-dot ${state[i.id]?.correct ? 'hit' : 'miss'}"></span>`
-      ).join('');
-    document.getElementById(`scoretext-${modId}`).textContent =
-      `${nCorrect} of ${items.length} correct`;
-    document.getElementById(`${modId}-btn`).disabled = false;
+  var mod = document.getElementById(modId);
+  if (!mod) return;
+  var items = mod.querySelectorAll('.quiz-item');
+  var nAnswered = 0;
+  Array.from(items).forEach(function(item) { if (answered[item.id]) nAnswered++; });
+
+  var counter = document.getElementById('qcount-' + modId);
+  if (counter) counter.textContent = nAnswered + ' / ' + MOD_Q_COUNT[modId] + ' answered';
+
+  if (nAnswered === items.length) {
+    var nCorrect = 0;
+    Array.from(items).forEach(function(item) {
+      if (answered[item.id] && answered[item.id].correct) nCorrect++;
+    });
+
+    var scoreBar = document.getElementById('score-' + modId);
+    if (scoreBar) scoreBar.classList.add('show');
+
+    var dotsEl = document.getElementById('dots-' + modId);
+    if (dotsEl) {
+      dotsEl.innerHTML = Array.from(items).map(function(item) {
+        return '<span class="score-dot ' + (answered[item.id] && answered[item.id].correct ? 'hit' : 'miss') + '"></span>';
+      }).join('');
+    }
+
+    var scoreText = document.getElementById('scoretext-' + modId);
+    if (scoreText) scoreText.textContent = nCorrect + ' of ' + items.length + ' correct';
+
+    var continueBtn = document.getElementById(modId + '-btn');
+    if (continueBtn) continueBtn.disabled = false;
   }
 }
 
-// ── MODULE COMPLETE ────────────────────────────────────────────────────────────
-function completeMod(cur, next) {
-  done.add(cur);
-  updateProg();
-  const el = document.getElementById(cur);
-  el.classList.remove('active', 'open');
-  el.classList.add('completed');
-  el.querySelector('.mod-badge').className   = 'mod-badge badge-done';
-  el.querySelector('.mod-badge').textContent = 'Complete ✓';
+function completeMod(curId, nextId) {
+  if (doneMods.indexOf(curId) === -1) doneMods.push(curId);
+  updateProgress();
 
-  if (next) {
-    const nx = document.getElementById(next);
-    nx.classList.remove('locked');
-    nx.classList.add('active');
-    nx.style.opacity       = '';
-    nx.style.pointerEvents = '';
-    nx.querySelector('.mod-badge').className   = 'mod-badge badge-active';
-    nx.querySelector('.mod-badge').textContent = 'In progress';
-    setTimeout(() => nx.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+  var cur = document.getElementById(curId);
+  if (cur) {
+    cur.classList.remove('active', 'open');
+    cur.classList.add('completed');
+    var badge = cur.querySelector('.mod-badge');
+    if (badge) { badge.className = 'mod-badge badge-done'; badge.textContent = 'Complete ✓'; }
+  }
+
+  if (nextId) {
+    var nx = document.getElementById(nextId);
+    if (nx) {
+      nx.classList.remove('locked');
+      nx.classList.add('active');
+      nx.style.opacity = '';
+      nx.style.pointerEvents = '';
+      var nb = nx.querySelector('.mod-badge');
+      if (nb) { nb.className = 'mod-badge badge-active'; nb.textContent = 'In progress'; }
+      setTimeout(function() { nx.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+    }
   }
 }
 
-// ── FINISH & ISSUE CERTIFICATE ────────────────────────────────────────────────
-async function finishTrack() {
-  done.add('tmod6');
-  updateProg();
-  const el = document.getElementById('tmod6');
-  el.classList.remove('active', 'open');
-  el.classList.add('completed');
-  el.querySelector('.mod-badge').className   = 'mod-badge badge-done';
-  el.querySelector('.mod-badge').textContent = 'Complete ✓';
+function finishTrack() {
+  if (doneMods.indexOf('tmod6') === -1) doneMods.push('tmod6');
+  updateProgress();
 
-  let totalCorrect = 0, totalQ = 0;
-  document.querySelectorAll('.quiz-item').forEach(item => {
+  var tmod6 = document.getElementById('tmod6');
+  if (tmod6) {
+    tmod6.classList.remove('active', 'open');
+    tmod6.classList.add('completed');
+    var b = tmod6.querySelector('.mod-badge');
+    if (b) { b.className = 'mod-badge badge-done'; b.textContent = 'Complete ✓'; }
+  }
+
+  var totalCorrect = 0, totalQ = 0;
+  document.querySelectorAll('.quiz-item').forEach(function(item) {
     totalQ++;
-    if (state[item.id]?.correct) totalCorrect++;
+    if (answered[item.id] && answered[item.id].correct) totalCorrect++;
   });
 
-  const card = document.getElementById('completionCard');
-  card.style.display = 'block';
-  setTimeout(() => card.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
-
-  try {
-    const resp = await fetch('/api/complete', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, track: 'technical', score: totalCorrect, totalQ }),
-    });
-    const data = await resp.json();
-    if (!data.success) throw new Error(data.error || 'Certificate API error');
-
-    sessionStorage.setItem('aegis_tech_cert_id',  data.certId);
-    sessionStorage.setItem('aegis_tech_cert_url', data.certUrl);
-    sessionStorage.setItem('pt_name',   data.name);
-    sessionStorage.setItem('pt_org',    data.org || uOrg || '—');
-    sessionStorage.setItem('pt_role',   ROLE_LABELS[role] || role);
-    sessionStorage.setItem('pt_score',  `${data.score}/${data.totalQ} (${data.pct}%)`);
-    sessionStorage.setItem('pt_date',   new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}));
-    sessionStorage.setItem('pt_id',     data.certId);
-    sessionStorage.setItem('pt_verify', data.certUrl);
-
-    document.getElementById('certPill').textContent  = 'Technical Certificate Issued';
-    document.getElementById('tcName').textContent    = data.name;
-    document.getElementById('tcOrg').textContent     = data.org || uOrg || '—';
-    document.getElementById('tcRole').textContent    = ROLE_LABELS[role] || role;
-    document.getElementById('tcScore').textContent   = `${data.score}/${data.totalQ} (${data.pct}%)`;
-    document.getElementById('tcDate').textContent    =
-      new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
-    document.getElementById('tcId').textContent      = data.certId;
-    const vl = document.getElementById('tcVerifyLink');
-    vl.href        = data.certUrl;
-    vl.textContent = '🔗 Verify certificate';
-    document.getElementById('techCertDisplay').style.display = 'block';
-
-  } catch(e) {
-    console.error('[finishTrack] certificate error:', e.message);
-    document.getElementById('certPill').textContent = 'Technical Track Complete';
-    document.getElementById('techCertDisplay').style.display = 'block';
-    document.getElementById('tcName').textContent = uName || 'Participant';
+  var card = document.getElementById('completionCard');
+  if (card) {
+    card.style.display = 'block';
+    setTimeout(function() { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
   }
+
+  var dateStr = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  if (!token) {
+    var el = document.getElementById('tcName');
+    if (el) el.textContent = uName || 'Participant';
+    return;
+  }
+
+  fetch('/api/complete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: token, track: 'technical', score: totalCorrect, totalQ: totalQ })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!data.success) throw new Error(data.error || 'API error');
+
+    sessionStorage.setItem('aegis_technical_complete', 'true');
+    sessionStorage.setItem('aegis_tcert_id',  data.certId);
+    sessionStorage.setItem('aegis_tcert_url', data.certUrl);
+    sessionStorage.setItem('tp_name',   data.name);
+    sessionStorage.setItem('tp_org',    data.org || uOrg || '—');
+    sessionStorage.setItem('tp_role',   ROLE_LABELS[role] || role);
+    sessionStorage.setItem('tp_score',  data.score + '/' + data.totalQ + ' (' + data.pct + '%)');
+    sessionStorage.setItem('tp_date',   dateStr);
+    sessionStorage.setItem('tp_id',     data.certId);
+    sessionStorage.setItem('tp_verify', data.certUrl);
+
+    function setEl(id, val) { var e = document.getElementById(id); if (e) e.textContent = val; }
+    setEl('tcName',  data.name);
+    setEl('tcOrg',   data.org || uOrg || '—');
+    setEl('tcRole',  ROLE_LABELS[role] || role);
+    setEl('tcScore', data.score + '/' + data.totalQ + ' (' + data.pct + '%)');
+    setEl('tcDate',  dateStr);
+    setEl('tcId',    data.certId);
+
+    var vl = document.getElementById('tcVerifyLink');
+    if (vl) { vl.href = data.certUrl; vl.textContent = '🔗 Verify certificate'; }
+
+    var pill = document.getElementById('certPill');
+    if (pill) pill.textContent = 'Certificate Issued';
+
+    var disp = document.getElementById('techCertDisplay');
+    if (disp) disp.style.display = 'block';
+  })
+  .catch(function(e) {
+    console.error('[finishTrack]', e.message);
+    var el = document.getElementById('tcName');
+    if (el) el.textContent = uName || 'Participant';
+  });
 }
 
-// ── CERTIFICATE DOWNLOAD ──────────────────────────────────────────────────────
 function downloadCert() {
-  document.getElementById('tp-name').textContent   = sessionStorage.getItem('pt_name')   || uName;
-  document.getElementById('tp-org').textContent    = sessionStorage.getItem('pt_org')    || uOrg || '—';
-  document.getElementById('tp-role').textContent   = sessionStorage.getItem('pt_role')   || ROLE_LABELS[role];
-  document.getElementById('tp-score').textContent  = sessionStorage.getItem('pt_score')  || '—';
-  document.getElementById('tp-date').textContent   = sessionStorage.getItem('pt_date')   || '—';
-  document.getElementById('tp-id').textContent     = sessionStorage.getItem('pt_id')     || '—';
-  document.getElementById('tp-verify').textContent = sessionStorage.getItem('pt_verify') || '—';
+  function get(key, fb) { return sessionStorage.getItem(key) || fb || '—'; }
+  function setEl(id, val) { var e = document.getElementById(id); if (e) e.textContent = val; }
+  setEl('tp-name',   get('tp_name', uName));
+  setEl('tp-org',    get('tp_org', uOrg));
+  setEl('tp-role',   get('tp_role', ROLE_LABELS[role]));
+  setEl('tp-score',  get('tp_score'));
+  setEl('tp-date',   get('tp_date'));
+  setEl('tp-id',     get('tp_id'));
+  setEl('tp-verify', get('tp_verify'));
 
-  const pg = document.getElementById('techPrintPage');
+  var pg = document.getElementById('techPrintPage');
+  if (!pg) return;
   pg.style.display = 'block';
-  setTimeout(() => {
+  setTimeout(function() {
     window.print();
-    setTimeout(() => { pg.style.display = 'none'; }, 600);
+    setTimeout(function() { pg.style.display = 'none'; }, 600);
   }, 150);
 }
 </script>
