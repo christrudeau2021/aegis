@@ -1,22 +1,58 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/sim/:token",          "destination": "/api/sim-click" },
-    { "source": "/training",            "destination": "/training.html" },
-    { "source": "/training/general",    "destination": "/tracks/general.html" },
-    { "source": "/training/technical",  "destination": "/tracks/technical.html" },
-    { "source": "/admin",               "destination": "/static/dashboard.html" },
-    { "source": "/phished",             "destination": "/static/phished.html" },
-    { "source": "/api/cert/:certId",    "destination": "/api/verify" }
+    {
+      "source": "/sim/:token",
+      "destination": "/api/sim-click"
+    },
+    {
+      "source": "/training",
+      "destination": "/training.html"
+    },
+    {
+      "source": "/training/general",
+      "destination": "/tracks/general.html"
+    },
+    {
+      "source": "/training/technical",
+      "destination": "/tracks/technical.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/static/dashboard.html"
+    },
+    {
+      "source": "/phished",
+      "destination": "/static/phished.html"
+    },
+    {
+      "source": "/api/cert/:certId",
+      "destination": "/api/verify"
+    }
   ],
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin",  "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
       ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/keepalive",
+      "schedule": "0 12 * * *"
     }
   ]
 }
