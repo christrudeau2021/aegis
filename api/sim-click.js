@@ -63,7 +63,7 @@ function serveLoginPage(res, platform, email, token) {
 
   try {
     let html = readFileSync(
-      join(process.cwd(), 'public', 'login-pages', templateFile),
+      join(process.cwd(), 'login-pages', templateFile),
       'utf8'
     );
     html = html
